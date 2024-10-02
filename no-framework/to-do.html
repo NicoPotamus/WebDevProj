@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do List</title>
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    >
+
+
+</head>
+<body>
+
+    <div class="container">
+        <div class="section">
+            <div id="app">
+                <nav class="panel">
+                    <p class="panel-heading">To-Do</p>
+                    <div class="panel-block">
+                      <p class="panel-tabs">
+                        <a :class="{is-active: tabs[0].isActive}" @click="clickAll">All</a>
+                        <a :class="{is-active: tabs[1].isActive}" @click="clickToComplete">To Complete</a>
+                        <a :class="{is-active: tabs[2].isActive}" @click="clickCompleted">Completed</a>
+                      </p>
+                    </div>
+                    <label v-for="item in renderedList" class="panel-block is-block">
+                      <input type="checkbox" v-model="item.completed" @change="completeTask(item)"/>
+                      {{item.task}} <span class="tag is-info is-pulled-right">{{item.date}}</span>
+                    </label>
+
+                    <div class="panel-block">
+                      <button class="button is-link is-outlined is-fullwidth" @click="openModal" >
+                        Add Task
+                      </button>
+                    </div>
+                  </nav>
+
+                  <div class="modal" :class="{'is-active': isModalOpen}">
+                    <div class="modal-background" @click="closeModal"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                          <p class="modal-card-title">Create Task</p>
+                          <button class="delete" @click="closeModal" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="field">
+                                <label class="label">Task</label>
+                                <div class="control">
+                                  <input class="input" type="text" placeholder="Text input" v-model="newTask">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Date</label>
+                                <div class="control">
+                                  <input class="input" type="text" placeholder="mm/dd/yyyy" v-model="newDate">
+                                </div>
+                            </div>
+                        </section>
+                        <footer class="modal-card-foot">
+                          <div class="buttons">
+                            <button class="button is-success" @click="addTask">Save changes</button>
+                            <button class="button" @click="closeModal">Cancel</button>
+                          </div>
+                        </footer>
+                      </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp, ref } = Vue 
+
+        createApp({
+            setup() {
+
+                const list = [
+                    {task:"Make To Do List", date: "9/19/2024", completed: false},
+                    {task:"Learn Vue", date: "10/21/2024", completed: false},
+                ]
+                
+                const renderedList = ref([])
+                const isModalOpen = ref(false)
+
+                function openModal() {
+                    isModalOpen.value = true
+                }
+
+                function closeModal() {
+                    isModalOpen.value = false
+                }
+
+                const newTask = ref('')
+                const newDate = ref('')
+
+                function addTask(){
+                  if(newTask.value && newDate.value){
+                    list.value.push({task: newTask.value, date: newDate.value})
+                    newTask.value = ''
+                    newDate.value = ''
+                    closeModal()
+                  }
+                }
+
+                const tabs = ref([ {name: 'All', isActive: true}, {name: 'To Complete', isActive: false}, {name: 'Completed', isActive: false}])
+
+                function clickAll(){
+                  tabs.value.forEach(tab => tab.isActive = false)
+                  tabs.value[0].isActive = true
+                  renderedList.value = list.value
+                }
+                function clickToComplete(){
+                  tabs.value.forEach(tab => tab.isActive = false)
+                  tabs.value[1].isActive = true
+                  renderedList.value = list.value.filter(item => !item.completed)
+                }
+                function clickCompleted(){
+                  tabs.value.forEach(tab => tab.isActive = false)
+                  tabs.value[2].isActive = true
+                  renderedList.value = list.value.filter(item => item.completed)
+                }
+
+                return {
+                    renderedList, openModal, isModalOpen, closeModal, addTask, clickAll, clickCompleted, clickToComplete, tabs 
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>
