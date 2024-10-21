@@ -3,11 +3,18 @@ import type { Workout } from "./workoutModel";
 export interface User {
     firstName: string;
     lastName: string;
-    dob : string;
+    dob : Date;
     email: string;
     password: string;
-    biogrpahy: string;
+    biography?: string;
     photo: string;
-    workouts: Workout[];
-    following: User[];
+    workouts?: Workout[];
+    following?: User[];
+    stats?: Stats;
+    username: string;
+}
+
+interface Stats{
+    //TODO: Add stats for workouts throughout time
+    RandomAttributeToSaveErrors: null;
 }

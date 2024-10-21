@@ -11,12 +11,8 @@ const userWorkouts = ref<Workout[]>([
       {
         exercise: {
           name: '90/90 Hamstring',
-          force: 'push',
-          level: 'beginner',
-          mechanic: null,
           equipment: 'body only',
           primaryMuscles: ['hamstrings'],
-          secondaryMuscles: ['calves'],
           instructions: [
             'Lie on your back, with one leg extended straight out.',
             'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',

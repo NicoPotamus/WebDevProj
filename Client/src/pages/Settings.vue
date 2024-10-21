@@ -1,4 +1,43 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import PersonalInfo from '@/components/PersonalInfo.vue';
+import type { User } from '@/model/user';
+import { ref } from 'vue';
+
+const user = ref<User>({
+  firstName: 'Nico',
+  lastName: 'DeMilio',
+  dob: new Date('1999-09-19'),
+  email: 'NicoDeMilio@email.com',
+  password: 'password',
+  biography: 'I am a student at SUNY new paltz',
+  photo: 'some.jpg',
+  workouts: [
+    {
+      name: 'ChoO cHOo cAlOo',
+      sets: 4,
+      exercises: [
+        {
+          exercise: {
+            name: '90/90 Hamstring',
+            equipment: 'body only',
+            primaryMuscles: ['hamstrings'],
+            instructions: [
+              'Lie on your back, with one leg extended straight out.',
+              'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
+              'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
+              'Repeat for 10-20 repetitions, and then switch to the other leg.',
+            ],
+            category: 'stretching',
+          },
+          reps: 15,
+        },
+      ],
+    },
+  ],
+  following: [],
+  username: 'NicoD',
+})
+</script>
 
 <template>
   <div>
@@ -7,59 +46,7 @@
         <p class="title">Account</p>
       </div>
     </section>
-    <sectiom class="section">
-      <div class="box">
-        <div class="field">
-          <label class="label">First Name</label>
-          <div class="control">
-            <input class="input" type="text" placeholder="First Name" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Last Name</label>
-          <div class="control">
-            <input class="input" type="text" placeholder="Last Name" />
-          </div>
-        </div>
-        <div class="field" >
-          <label class="label" for="date" >
-            Date of Birth
-          </label>
-          <input type="date" class="input"/>
-        </div>
-      </div>
-
-      <div class="box">
-        <div class="field">
-          <label class="label">Email</label>
-          <div class="control">
-            <input class="input" type="text" placeholder="Email" />
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Password</label>
-          <div class="control">
-            <input class="input" type="text" placeholder="Password" />
-          </div>
-        </div>
-      </div>
-      <div class="box">
-        <div class="field">
-          <label class="label">Biography</label>
-          <div class="control">
-            <input class="input" type="text" placeholder="Bio" />
-          </div>
-        </div>
-      </div>
-      <div class="box">
-        <div class="field">
-          <label class="label">UserPhoto</label>
-          <div class="control">
-            <input class="input" type="text" placeholder=".JPG or PNG" />
-          </div>
-        </div>
-      </div>
-    </sectiom>
+    <PersonalInfo :user="user"/>
   </div>
 </template>
 
