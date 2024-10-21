@@ -1,7 +1,7 @@
 <script lang="ts"></script>
 
 <template>
-  <section class="hero is-success">
+  <section class="hero is-link">
     <div class="hero-body">
       <p class="title">Welcome User</p>
     </div>
@@ -31,10 +31,10 @@
         <progress class="progress" value="15" max="100">15%</progress>
 
         <p>Saturday</p>
-        <progress class="progress" value="15" max="100">15%</progress>
+        <progress class="progress" value="2" max="3">15%</progress>
 
         <p>Sunday</p>
-        <progress class="progress" value="15" max="100">15%</progress>
+        <progress class="progress" value="1" max="3">15%</progress>
       </div>
         </div>
         <div class="column is-half">
