@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import type { User } from '@/model/user'
 import type { Workout } from '@/model/workoutModel';
@@ -192,7 +193,7 @@ function viewWorkout(workout : Workout) {
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
-      <p class="modal-card-title">{{workoutref.name}}</p>
+      <p class="modal-card-title">{{workoutref?.name}}</p>
       <button class="delete" aria-label="close" @click="isModalOpen = !isModalOpen"></button>
     </header>
     <section class="modal-card-body"
@@ -216,7 +217,7 @@ function viewWorkout(workout : Workout) {
           <b>Reps</b>: {{exercise.reps}}
         </p>
       </div>
-      <p><b>Sets</b> {{ workoutref.sets }}</p>
+      <p><b>Sets</b> {{ workoutref?.sets }}</p>
 
     </section>
     <footer class="modal-card-foot">
