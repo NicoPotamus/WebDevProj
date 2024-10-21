@@ -3,7 +3,33 @@ import { ref } from 'vue'
 import { type Workout, type WorkObj } from '../model/workoutModel'
 import { getAll, type Exercise } from '../model/exercises'
 
-const userWorkouts = ref<Workout[]>([])
+const userWorkouts = ref<Workout[]>([
+  {
+    name: 'ChoO cHOo cAlOo',
+    sets: 4,
+    exercises: [
+      {
+        exercise: {
+          name: '90/90 Hamstring',
+          force: 'push',
+          level: 'beginner',
+          mechanic: null,
+          equipment: 'body only',
+          primaryMuscles: ['hamstrings'],
+          secondaryMuscles: ['calves'],
+          instructions: [
+            'Lie on your back, with one leg extended straight out.',
+            'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
+            'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
+            'Repeat for 10-20 repetitions, and then switch to the other leg.',
+          ],
+          category: 'stretching',
+        },
+        reps: 15,
+      },
+    ],
+  },
+])
 const isModalOpen = ref(false)
 
 function openModal() {
@@ -21,27 +47,40 @@ const modalWorkout = ref<Workout>({
   exercises: [],
 })
 
-const exercisesInModal = ref<WorkObj[]>([]);
-const dropdownState = ref<boolean[]>([]);
+const exercisesInModal = ref<WorkObj[]>([])
+const dropdownState = ref<boolean[]>([])
 
 function addExercise() {
-  exercisesInModal.value.push({ exercise: null, reps: 0 });
-  dropdownState.value.push(false);
+  exercisesInModal.value.push({ exercise: null, reps: 0 })
+  dropdownState.value.push(false)
 }
-
 
 function addWorkout() {
-    modalWorkout.value.exercises.push(...exercisesInModal.value)
-    userWorkouts.value.push(modalWorkout.value)
-    modalWorkout.value = {
-      name: '',
-      sets: 0,
-      exercises: [],
-    }
-    dropdownState.value = [];
-    closeModal()
+  modalWorkout.value.exercises.push(...exercisesInModal.value)
+  userWorkouts.value.push(modalWorkout.value)
+  console.log(modalWorkout.value)
+  modalWorkout.value = {
+    name: '',
+    sets: 0,
+    exercises: [],
+  }
+  dropdownState.value = []
+  closeModal()
 }
 
+function editWorkout(workout: Workout) {
+  modalWorkout.value = { ...workout }
+  exercisesInModal.value = workout.exercises.map(ex => ({ ...ex }))
+  dropdownState.value = workout.exercises.map(() => false)
+  openModal()
+}
+
+function deleteWorkout(workout: Workout) {
+  const index = userWorkouts.value.findIndex(w => w.name === workout.name)
+  if (index !== -1) {
+    userWorkouts.value.splice(index, 1)
+  }
+}
 //----------------------in dropdown----------------------------------------
 
 const panelTabs = ref([
@@ -128,15 +167,20 @@ function filterAbs() {
       <nav class="panel">
         <p class="panel-heading">Current Workouts</p>
         <a
-          class="panel-block"
+          class="panel-block is-block"
           v-for="workout in userWorkouts"
           :key="workout.name"
+          @click="editWorkout(workout)"
         >
-          <span class="panel-icon">
-            <i class="fa-solid fa-dumbbell"></i>
-          </span>
-          {{ workout.name }}
+              <span class="panel-icon">
+                <i class="fa-solid fa-dumbbell"></i>
+              </span>
+              {{ workout.name }}
+            <div class="buttons is-right">
+                <button class="delete" @click.stop="deleteWorkout(workout)"></button>
+            </div>
         </a>
+
         <div class="panel-block">
           <button
             class="button is-link is-outlined is-fullwidth"
@@ -169,9 +213,11 @@ function filterAbs() {
                 />
               </div>
             </div>
-            <div class="box"
+            <div
+              class="box"
               v-for="(exercise, index) in exercisesInModal"
-              :key="index">
+              :key="index"
+            >
               <div class="field">
                 <label class="label">Exercise</label>
                 <div class="control">
@@ -188,9 +234,7 @@ function filterAbs() {
                         aria-haspopup="true"
                         aria-controls="dropdown-menu"
                       >
-                        <span v-if="exercise.exercise === null"
-                          >Exercise</span
-                        >
+                        <span v-if="exercise.exercise === null">Exercise</span>
                         <span v-else>{{ exercise.exercise.name }}</span>
                         <span class="icon is-small">
                           <i class="fas fa-angle-down" aria-hidden="true"></i>

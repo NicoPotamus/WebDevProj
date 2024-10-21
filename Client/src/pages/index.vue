@@ -1,7 +1,7 @@
 <script lang="ts"></script>
 
 <template>
-  <section class="hero is-success">
+  <section class="hero is-link">
     <div class="hero-body">
       <p class="title">Welcome User</p>
     </div>
