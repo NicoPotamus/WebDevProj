@@ -1,13 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import PersonalInfo from '@/components/PersonalInfo.vue';
-import type { User } from '@/model/user';
-import { ref } from 'vue';
+import PersonalInfo from '@/components/PersonalInfo.vue'
+import { emptyStats, type User } from '@/model/user'
+import { ref } from 'vue'
 
 const user = ref<User>({
   firstName: 'Nico',
   lastName: 'DeMilio',
-  dob: new Date('1999-09-19'),
+  dob: new Date(1999, 9, 19, 0, 0, 0, 0),
   email: 'NicoDeMilio@email.com',
   password: 'password',
   biography: 'I am a student at SUNY new paltz',
@@ -37,6 +37,9 @@ const user = ref<User>({
   ],
   following: [],
   username: 'NicoD',
+  id: 0,
+  stats: emptyStats,
+  admin: false,
 })
 </script>
 
@@ -47,7 +50,7 @@ const user = ref<User>({
         <p class="title">Account</p>
       </div>
     </section>
-    <PersonalInfo :user="user"/>
+    <PersonalInfo :user="user" />
   </div>
 </template>
 

@@ -31,15 +31,18 @@ const isOpen = ref(false)
         <RouterLink class="navbar-item" to="/workouts"> Workouts </RouterLink>
         <RouterLink class="navbar-item" to="/friends"> Friends </RouterLink>
         <RouterLink class="navbar-item" to="/settings"> Settings </RouterLink>
+        <RouterLink class="navbar-item" to="/admin"> Admin </RouterLink>
       </div>
 
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
-            <RouterLink class="button is-primary" to="/signup">
+            <RouterLink class="button is-primary" to="/register">
               <strong>Sign up</strong>
             </RouterLink>
-            <a class="button is-light"> Log in </a>
+            <RouterLink class="button is-light" to="/signin">
+              Log in
+            </RouterLink>
           </div>
         </div>
       </div>

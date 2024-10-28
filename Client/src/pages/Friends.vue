@@ -1,8 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import type { User } from '@/model/user'
-import type { Workout } from '@/model/workoutModel';
+import { emptyStats, type User } from '@/model/user'
+import type { Workout } from '@/model/workoutModel'
 import { ref } from 'vue'
+import NicoPhoto from '../assets/NicoPhoto.jpg'
+import JohnPhoto from '../assets/JohnPhoto.jpg'
 
 const selectedFriend = ref<User>({
   firstName: '',
@@ -15,6 +17,9 @@ const selectedFriend = ref<User>({
   workouts: [],
   following: [],
   username: '',
+  id: 0,
+  stats: emptyStats,
+  admin: false,
 })
 
 const friends = ref<User[]>([
@@ -25,7 +30,7 @@ const friends = ref<User[]>([
     email: 'NicoDeMilio@email.com',
     password: 'password',
     biography: 'I am a student at SUNY new paltz',
-    photo: 'some.jpg',
+    photo: NicoPhoto,
     workouts: [
       {
         name: 'ChoO cHOo cAlOo',
@@ -51,6 +56,9 @@ const friends = ref<User[]>([
     ],
     following: [],
     username: 'NicoD',
+    id: 1,
+    stats: emptyStats,
+    admin: false,
   },
   {
     firstName: 'John',
@@ -59,7 +67,7 @@ const friends = ref<User[]>([
     email: 'coolBeans@email.com',
     password: 'password',
     biography: 'I am a student at SUNY new paltz',
-    photo: 'some.jpg',
+    photo: JohnPhoto,
     workouts: [
       {
         name: 'ChoO cHOo cAlOo',
@@ -85,6 +93,9 @@ const friends = ref<User[]>([
     ],
     following: [],
     username: 'JohnD',
+    id: 2,
+    stats: emptyStats,
+    admin: false,
   },
 ])
 
@@ -102,11 +113,10 @@ const workoutref = ref<Workout>()
 //for workout modal
 const isModalOpen = ref(false)
 
-function viewWorkout(workout : Workout) {
+function viewWorkout(workout: Workout) {
   workoutref.value = workout
   isModalOpen.value = true
 }
-
 </script>
 
 <template>
@@ -133,21 +143,30 @@ function viewWorkout(workout : Workout) {
       <div class="column is-three-fifths">
         <div class="card">
           <div class="card-image">
-            <figure class="image is-4by3">
+            <figure v-if="selectedFriend.photo === ''" class="image is-4by3">
               <img
                 src="https://bulma.io/assets/images/placeholders/1280x960.png"
                 alt="Placeholder image"
               />
             </figure>
+            <figure v-else class="image is-4by3">
+              <img :src="selectedFriend.photo" alt="Placeholder image" />
+            </figure>
           </div>
           <div class="card-content">
             <div class="media">
               <div class="media-left">
-                <figure class="image is-48x48">
+                <figure
+                  v-if="selectedFriend.photo === ''"
+                  class="image is-48x48"
+                >
                   <img
-                    src="https://bulma.io/assets/images/placeholders/96x96.png"
+                    src="https://bulma.io/assets/images/placeholders/1280x960.png"
                     alt="Placeholder image"
                   />
+                </figure>
+                <figure v-else class="image is-48x48">
+                  <img :src="selectedFriend.photo" alt="Placeholder image" />
                 </figure>
               </div>
               <div class="media-content">
@@ -158,12 +177,9 @@ function viewWorkout(workout : Workout) {
               </div>
             </div>
             <div class="content">{{ selectedFriend.biography }}</div>
-            <div class="dropdown is-active" :class="{ 'is-active': dropdownState }">
-              <div
-                class= "dropdown-trigger"
-                @click="toggleDropdown()"
-              >
-                <button class="card-header-icon" aria-label="more options" >
+            <div class="dropdown" :class="{ 'is-active': dropdownState }">
+              <div class="dropdown-trigger" @click="toggleDropdown()">
+                <button class="card-header-icon" aria-label="more options">
                   <p class="card-header-title">Workouts</p>
                   <span class="icon">
                     <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -178,7 +194,9 @@ function viewWorkout(workout : Workout) {
                 >
                   <div class="content">
                     <div class="dropdown-content">
-                      <a class="dropdown-item" @click="viewWorkout(workout)"> {{ workout.name }} </a>
+                      <a class="dropdown-item" @click="viewWorkout(workout)">
+                        {{ workout.name }}
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -189,45 +207,53 @@ function viewWorkout(workout : Workout) {
       </div>
     </div>
   </section>
-  <div class="modal" :class="{ 'is-active' : isModalOpen}">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">{{workoutref?.name}}</p>
-      <button class="delete" aria-label="close" @click="isModalOpen = !isModalOpen"></button>
-    </header>
-    <section class="modal-card-body"
-    v-for="exercise in workoutref?.exercises"
-    :key="exercise.exercise?.name">
-      <div class="box">
-        <p class="title is-4">
-          {{exercise.exercise?.name}}
-        </p>
-        <br>
-        <p class="subtitle is-6">
-          <b>Equipment</b>: {{exercise.exercise?.equipment}}
-        </p>
-        <p class="subtitle is-6">
-          <b>Primary Muscles</b>: {{exercise.exercise?.primaryMuscles}}
+  <div class="modal" :class="{ 'is-active': isModalOpen }">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">{{ workoutref?.name }}</p>
+        <button
+          class="delete"
+          aria-label="close"
+          @click="isModalOpen = !isModalOpen"
+        ></button>
+      </header>
+      <section
+        class="modal-card-body"
+        v-for="exercise in workoutref?.exercises"
+        :key="exercise.exercise?.name"
+      >
+        <div class="box">
+          <p class="title is-4">
+            {{ exercise.exercise?.name }}
           </p>
-        <p class="subtitle is-6">
-          <b>Instructions</b>: {{ exercise.exercise?.instructions }}\
-        </p>
-        <p class="subtitle is-6">
-          <b>Reps</b>: {{exercise.reps}}
-        </p>
-      </div>
-      <p><b>Sets</b> {{ workoutref?.sets }}</p>
-
-    </section>
-    <footer class="modal-card-foot">
-      <div class="buttons">
-        <button class="button" @click="isModalOpen = !isModalOpen">Done</button>
-      </div>
-    </footer>
+          <br />
+          <p class="subtitle is-6">
+            <b>Equipment</b>: {{ exercise.exercise?.equipment }}
+          </p>
+          <p class="subtitle is-6">
+            <b>Primary Muscles</b>: {{ exercise.exercise?.primaryMuscles }}
+          </p>
+          <p><b>Instructions</b>:</p>
+          <div
+            v-for="instruction in exercise.exercise?.instructions"
+            :key="instruction"
+          >
+            <p>{{ instruction }}</p>
+          </div>
+          <p class="subtitle is-6"><b>Reps</b>: {{ exercise.reps }}</p>
+        </div>
+        <p><b>Sets</b> {{ workoutref?.sets }}</p>
+      </section>
+      <footer class="modal-card-foot">
+        <div class="buttons">
+          <button class="button" @click="isModalOpen = !isModalOpen">
+            Done
+          </button>
+        </div>
+      </footer>
+    </div>
   </div>
-</div>
-
 </template>
 
 <style scoped></style>

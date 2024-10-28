@@ -169,13 +169,16 @@ function filterAbs() {
           :key="workout.name"
           @click="editWorkout(workout)"
         >
-              <span class="panel-icon">
-                <i class="fa-solid fa-dumbbell"></i>
-              </span>
-              {{ workout.name }}
-            <div class="buttons is-right">
-                <button class="delete" @click.stop="deleteWorkout(workout)"></button>
-            </div>
+          <span class="panel-icon">
+            <i class="fa-solid fa-dumbbell"></i>
+          </span>
+          {{ workout.name }}
+          <div class="buttons is-right">
+            <button
+              class="delete"
+              @click.stop="deleteWorkout(workout)"
+            ></button>
+          </div>
         </a>
 
         <div class="panel-block">
@@ -277,7 +280,12 @@ function filterAbs() {
                             class="panel-block"
                             v-for="exerciseOption in displayedExercise"
                             :key="exerciseOption.name"
-                            @click="exercise.exercise = exerciseOption"
+                            @click="
+                              () => {
+                                exercise.exercise = exerciseOption
+                                dropdownState[index] = false
+                              }
+                            "
                           >
                             {{ exerciseOption.name }}
                           </a>
