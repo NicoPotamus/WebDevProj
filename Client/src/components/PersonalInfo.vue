@@ -3,11 +3,8 @@ import type { User } from '@/model/user'
 import { ref } from 'vue'
 
 const props = defineProps<{ user: User }>()
-// eslint-disable-next-line vue/no-dupe-keys
+
 const user = ref<User>(props.user)
-
-// eslint-disable-next-line vue/no-dupe-keys
-
 </script>
 
 <template>

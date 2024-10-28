@@ -1,9 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { emptyStats, type User } from '@/model/user'
+import { emptyStats, userNico, type User } from '@/model/user'
 import { ref } from 'vue'
 import NicoPhoto from '../assets/NicoPhoto.jpg'
 import JohnPhoto from '../assets/JohnPhoto.jpg'
+import PersonalInfo from '@/components/PersonalInfo.vue'
+
+const editUser = ref<User>(userNico)
+const editModal = ref<boolean>(false)
 
 const userList = ref<User[]>([
   {
@@ -81,6 +85,14 @@ const userList = ref<User[]>([
     admin: false,
   },
 ])
+function saveChanges() {
+  editModal.value = false
+}
+
+function fEditUser(user: User) {
+  editUser.value = user
+  editModal.value = true
+}
 </script>
 
 <template>
@@ -129,7 +141,7 @@ const userList = ref<User[]>([
               <td>
                 <div class="columns">
                   <div class="column is-half">
-                    <button class="button is-light">
+                    <button class="button is-light" @click="fEditUser(user)">
                       <i class="fa-solid fa-pencil"></i>
                     </button>
                   </div>
@@ -141,6 +153,27 @@ const userList = ref<User[]>([
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" :class="{ 'is-active': editModal }">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Edit UserStats</p>
+        </header>
+        <section class="modal-card-body">
+          <PersonalInfo :user="editUser" />
+
+          <button
+            class="modal-close is-large"
+            aria-label="close"
+            @click="editModal = !editModal"
+          ></button>
+          <button class="button is-success" @click="saveChanges()">Save</button>
+        </section>
       </div>
     </div>
   </div>

@@ -1,8 +1,18 @@
 <script setup lang="ts">
+import type { User } from '@/model/user'
+import { userNico } from '@/model/user'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const isOpen = ref(false)
+const user = ref<User>()
+const possibleUsers = ref<User[]>([userNico])
+
+const dropUser = ref(false)
+function signIn(usr: User) {
+  user.value = usr
+  dropUser.value = false
+}
 </script>
 
 <template>
@@ -31,19 +41,40 @@ const isOpen = ref(false)
         <RouterLink class="navbar-item" to="/workouts"> Workouts </RouterLink>
         <RouterLink class="navbar-item" to="/friends"> Friends </RouterLink>
         <RouterLink class="navbar-item" to="/settings"> Settings </RouterLink>
-        <RouterLink class="navbar-item" to="/admin"> Admin </RouterLink>
+        <RouterLink v-if="user?.admin" class="navbar-item" to="/admin">
+          Admin
+        </RouterLink>
       </div>
 
       <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <RouterLink class="button is-primary" to="/register">
-              <strong>Sign up</strong>
-            </RouterLink>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link"> Log in </a>
+
+          <div
+            class="navbar-dropdown"
+            v-for="userP in possibleUsers"
+            :key="userP.id"
+          >
+            <a class="navbar-item" @click="signIn(userP)">
+              {{ userP.firstName }} {{ userP.lastName }}
+            </a>
+            <hr class="navbar-divider" />
             <RouterLink class="button is-light" to="/signin">
               Log in
             </RouterLink>
           </div>
+        </div>
+
+        <div v-if="user" class="navbar-item">
+          <button class="button is-danger" @click="user = undefined">
+            <strong>Log Out</strong>
+          </button>
+        </div>
+
+        <div class="navbar-item">
+          <RouterLink class="button is-primary" to="/register">
+            <strong>Sign up</strong>
+          </RouterLink>
         </div>
       </div>
     </div>
