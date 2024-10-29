@@ -18,13 +18,13 @@ export interface User {
 
 interface Stats {
   //TODO: Add stats for workouts throughout time
-  recordedWorkouts: Map<Date, Workout[]>
+  recordedWorkouts: Map<string, Workout[]>
   deadlift: number
   squat: number
   bench: number
 }
 export const emptyStats: Stats = {
-  recordedWorkouts: new Map<Date, Workout[]>(),
+  recordedWorkouts: new Map<string, Workout[]>(),
   deadlift: 0,
   squat: 0,
   bench: 0,
@@ -51,14 +51,14 @@ const choochooWorkout = {
   ],
 }
 //TEST USER
-const workoutMap = new Map<Date, Workout[]>()
-workoutMap.set(new Date(2024, 9, 20, 20, 32, 0), [choochooWorkout])
-workoutMap.set(new Date(2024, 9, 21, 20, 32, 0), [choochooWorkout])
-workoutMap.set(new Date(2024, 9, 22, 20, 32, 0), [choochooWorkout])
-workoutMap.set(new Date(2024, 9, 23, 20, 32, 0), [choochooWorkout])
-workoutMap.set(new Date(2024, 9, 24, 20, 32, 0), [choochooWorkout])
-workoutMap.set(new Date(2024, 9, 25, 20, 32, 0), [choochooWorkout])
-workoutMap.set(new Date(2024, 9, 26, 20, 32, 0), [choochooWorkout])
+const workoutMap = new Map<string, Workout[]>()
+workoutMap.set('2024-10-27', [choochooWorkout, choochooWorkout])
+workoutMap.set('2024-10-28', [choochooWorkout])
+workoutMap.set('2024-10-29', [choochooWorkout])
+workoutMap.set('2024-10-30', [choochooWorkout])
+workoutMap.set('2024-10-31', [choochooWorkout])
+workoutMap.set('2024-11-1', [choochooWorkout])
+workoutMap.set('2024-11-2', [choochooWorkout])
 
 const nicoStats: Stats = {
   recordedWorkouts: workoutMap,

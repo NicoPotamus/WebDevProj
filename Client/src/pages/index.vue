@@ -12,38 +12,40 @@ const curr = new Date() // get current date
 const first = curr.getDate() - curr.getDay() // First day is the day of the month - the day of the week
 
 const sundayDate = new Date(curr.setDate(first)).toDateString()
-const weeklyStats = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
+console.log('userWorkouts: before addition', userStats?.recordedWorkouts)
+console.log('Sunday Date: ', sundayDate)
 
 compileStats()
 
-function findWorkoutsByDate(
-  map: Map<Date, Workout[]>,
-  targetDate: Date,
-): Workout[] | null {
-  for (const [key, value] of map.entries()) {
-    console.log('targetData:', targetDate)
-    console.log('targetData constructor:', targetDate.constructor.name)
-    console.log('type of targetData:', typeof targetDate)
-    if (key === targetDate) {
-      return value
-    }
-  }
-  return null // Or any default value
+function stringifyDate(date: Date): string {
+  const str =
+    '' +
+    date.getFullYear() +
+    '-' +
+    (date.getMonth() + 1) +
+    '-' +
+    date.getDate() +
+    ''
+  return str
 }
 
 function compileStats() {
   for (let i = 0; i < 7; i++) {
     const date = new Date(curr.setDate(first + i)) //Date form not matching the date constructor
-
-    if (findWorkoutsByDate(userStats?.recordedWorkouts, date)) {
-      weeklyStats.value[i] =
-        findWorkoutsByDate(userStats?.recordedWorkouts, date)?.length ?? 0
+    console.log('date: ', date)
+    console.log('first and i: ', first, i)
+    const userStatMap = userStats?.recordedWorkouts
+    if (userStatMap.has(stringifyDate(date))) {
+      weeklyStats.value[i] = userStatMap?.get(stringifyDate(date))?.length ?? 0
     } else {
-      userStats?.recordedWorkouts.set(date, [])
+      weeklyStats.value[i] = 0
     }
     //console.log(date)
-    //console.log(weeklyStats.value[i])
   }
+  console.log('final array from loop', weeklyStats.value)
+  console.log('get nov 2 from oct 33', new Date(curr.setDate(4)))
+  console.log('get nov 2 from oct 33', new Date(curr.setDate(4)).toDateString())
 }
 
 //Log a workout
@@ -51,26 +53,23 @@ const workoutDate = ref<string>('') //default date of today
 const workoutPerformed = ref<Workout>()
 
 function logWorkout() {
+  console.log('workout DAte', workoutDate.value)
   if (workoutDate.value && workoutPerformed.value) {
-    const date = new Date(workoutDate.value)
-    date.setHours(0, 0, 0, 0)
-    if (findWorkoutsByDate(userStats?.recordedWorkouts, date)) {
-      const workouts =
-        findWorkoutsByDate(userStats?.recordedWorkouts, date) ?? []
+    const workouts = userStats?.recordedWorkouts.get(workoutDate.value)
+    console.log(workouts)
+    if (workouts) {
       workouts.push(workoutPerformed.value)
-      userStats?.recordedWorkouts.set(date, workouts)
+      userStats?.recordedWorkouts.set(workoutDate.value, workouts)
     } else {
-      userStats?.recordedWorkouts.set(date, [workoutPerformed.value])
+      userStats?.recordedWorkouts.set(workoutDate.value, [
+        workoutPerformed.value,
+      ])
     }
   }
   compileStats()
-  //console.log('workout Date Before', workoutDate.value)
-  //console.log('workout Date Before type', typeof workoutDate.value)
   workoutDate.value = ''
-  //console.log('workout Date after', workoutDate.value)
-  //console.log('workout Date after type', typeof workoutDate.value)
   workoutPerformed.value = undefined
-  console.log('userWorkouts:', userStats?.recordedWorkouts)
+  console.log('userWorkouts: after addition', userStats?.recordedWorkouts)
 }
 
 //Dropdown
@@ -201,6 +200,10 @@ function setWorkout(workout: Workout) {
           Log Workout
         </button>
       </div>
+      <pre v-for="(x, key) in user.stats.recordedWorkouts" :key="key">
+      {{ x }}
+    </pre
+      >
     </div>
   </div>
 </template>
