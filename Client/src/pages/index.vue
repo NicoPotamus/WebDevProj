@@ -8,13 +8,17 @@ import type { Workout } from '@/model/workoutModel'
 const user = ref(userNico)
 const userStats = user.value.stats
 
-const curr = new Date() // get current date
-const first = curr.getDate() - curr.getDay() // First day is the day of the month - the day of the week
+const today = new Date() // get current date
+const sDay = today.getDate() - today.getDay()
+const sundayDate = new Date(today.setDate(sDay)).toDateString()
 
-const sundayDate = new Date(curr.setDate(first)).toDateString()
+
+
+
+ // First day is the day of the month - the day of the week
+
 const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
 console.log('userWorkouts: before addition', userStats?.recordedWorkouts)
-console.log('Sunday Date: ', sundayDate)
 
 compileStats()
 
@@ -30,22 +34,24 @@ function stringifyDate(date: Date): string {
   return str
 }
 
+
 function compileStats() {
+
+  const curr = new Date() // get current date
+  const first = curr.getDate() - curr.getDay()
+
   for (let i = 0; i < 7; i++) {
-    const date = new Date(curr.setDate(first + i)) //Date form not matching the date constructor
+    const date = new Date(curr) 
+    date.setDate(first + i)
     console.log('date: ', date)
     console.log('first and i: ', first, i)
     const userStatMap = userStats?.recordedWorkouts
-    if (userStatMap.has(stringifyDate(date))) {
-      weeklyStats.value[i] = userStatMap?.get(stringifyDate(date))?.length ?? 0
-    } else {
-      weeklyStats.value[i] = 0
-    }
+    weeklyStats.value[i] = userStatMap?.get(stringifyDate(date))?.length ?? 0
     //console.log(date)
   }
   console.log('final array from loop', weeklyStats.value)
   console.log('get nov 2 from oct 33', new Date(curr.setDate(4)))
-  console.log('get nov 2 from oct 33', new Date(curr.setDate(4)).toDateString())
+  console.log('get nov 2 from oct 33', new Date(curr.setDate(first + 6)).toDateString())
 }
 
 //Log a workout
