@@ -110,12 +110,8 @@ function toggleDropdown() {
 }
 const workoutref = ref<Workout>()
 
-//for workout modal
-const isModalOpen = ref(false)
-
 function viewWorkout(workout: Workout) {
   workoutref.value = workout
-  isModalOpen.value = true
 }
 </script>
 
@@ -207,7 +203,8 @@ function viewWorkout(workout: Workout) {
       </div>
     </div>
   </section>
-  <div class="modal" :class="{ 'is-active': isModalOpen }">
+  <!-- If workoutref is null then it is falsy. i.e. it acts as false. When it has a value, then it reurns true-->
+  <div class="modal" :class="{ 'is-active': workoutref }">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
@@ -215,7 +212,7 @@ function viewWorkout(workout: Workout) {
         <button
           class="delete"
           aria-label="close"
-          @click="isModalOpen = !isModalOpen"
+          @click="workoutref = undefined"
         ></button>
       </header>
       <section
@@ -247,7 +244,7 @@ function viewWorkout(workout: Workout) {
       </section>
       <footer class="modal-card-foot">
         <div class="buttons">
-          <button class="button" @click="isModalOpen = !isModalOpen">
+          <button class="button" @click="workoutref = undefined">
             Done
           </button>
         </div>
