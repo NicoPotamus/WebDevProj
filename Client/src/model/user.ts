@@ -57,8 +57,8 @@ workoutMap.set('2024-10-28', [choochooWorkout])
 workoutMap.set('2024-10-29', [choochooWorkout])
 workoutMap.set('2024-10-30', [choochooWorkout])
 workoutMap.set('2024-10-31', [choochooWorkout])
-workoutMap.set('2024-11-1', [choochooWorkout])
-workoutMap.set('2024-11-2', [choochooWorkout])
+workoutMap.set('2024-11-07', [choochooWorkout])
+workoutMap.set('2024-11-09', [choochooWorkout])
 
 const nicoStats: Stats = {
   recordedWorkouts: workoutMap,

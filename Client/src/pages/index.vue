@@ -12,10 +12,7 @@ const today = new Date() // get current date
 const sDay = today.getDate() - today.getDay()
 const sundayDate = new Date(today.setDate(sDay)).toDateString()
 
-
-
-
- // First day is the day of the month - the day of the week
+// First day is the day of the month - the day of the week
 
 const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
 console.log('userWorkouts: before addition', userStats?.recordedWorkouts)
@@ -29,29 +26,23 @@ function stringifyDate(date: Date): string {
     '-' +
     (date.getMonth() + 1) +
     '-' +
-    date.getDate() +
+    String(date.getDate()).padStart(2, '0') +
     ''
   return str
 }
 
-
 function compileStats() {
-
   const curr = new Date() // get current date
   const first = curr.getDate() - curr.getDay()
 
   for (let i = 0; i < 7; i++) {
-    const date = new Date(curr) 
+    const date = new Date(curr)
     date.setDate(first + i)
     console.log('date: ', date)
-    console.log('first and i: ', first, i)
     const userStatMap = userStats?.recordedWorkouts
     weeklyStats.value[i] = userStatMap?.get(stringifyDate(date))?.length ?? 0
-    //console.log(date)
+    console.log("value for date ^^", weeklyStats.value[i])
   }
-  console.log('final array from loop', weeklyStats.value)
-  console.log('get nov 2 from oct 33', new Date(curr.setDate(4)))
-  console.log('get nov 2 from oct 33', new Date(curr.setDate(first + 6)).toDateString())
 }
 
 //Log a workout
@@ -59,7 +50,8 @@ const workoutDate = ref<string>('') //default date of today
 const workoutPerformed = ref<Workout>()
 
 function logWorkout() {
-  console.log('workout DAte', workoutDate.value)
+  console.log('workout DAte', new Date(workoutDate.value))
+  
   if (workoutDate.value && workoutPerformed.value) {
     const workouts = userStats?.recordedWorkouts.get(workoutDate.value)
     console.log(workouts)
@@ -206,10 +198,6 @@ function setWorkout(workout: Workout) {
           Log Workout
         </button>
       </div>
-      <pre v-for="(x, key) in user.stats.recordedWorkouts" :key="key">
-      {{ x }}
-    </pre
-      >
     </div>
   </div>
 </template>
