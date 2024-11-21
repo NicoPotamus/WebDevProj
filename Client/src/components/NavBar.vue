@@ -1,18 +1,14 @@
 <script setup lang="ts">
+import { refUser, signIn } from '@/model/sesssion';
 import type { User } from '@/model/user'
 import { userNico } from '@/model/user'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const isOpen = ref(false)
-const user = ref<User>()
+const user = refUser()
 const possibleUsers = ref<User[]>([userNico])
 
-const dropUser = ref(false)
-function signIn(usr: User) {
-  user.value = usr
-  dropUser.value = false
-}
 </script>
 
 <template>
@@ -66,7 +62,7 @@ function signIn(usr: User) {
         </div>
 
         <div v-if="user" class="navbar-item">
-          <button class="button is-danger" @click="user = undefined">
+          <button class="button is-danger" @click="signIn(null)">
             <strong>Log Out</strong>
           </button>
         </div>
