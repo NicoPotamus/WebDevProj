@@ -4,7 +4,15 @@
   "description": "Final Project for Web Server Programming",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js --watch server"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   },
   "repository": {
     "type": "git",
