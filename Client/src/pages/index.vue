@@ -1,12 +1,16 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
-//import type { User } from '@/model/user'
-import { userNico } from '@/model/user'
 import type { Workout } from '@/model/workoutModel'
+import { refUser } from '@/model/sesssion';
+import { useRouter } from 'vue-router';
 
-const user = ref(userNico)
-const userStats = user.value.stats
+const router = useRouter()
+const user = refUser();
+if(!user.value) {
+  router.push('/Signin')
+}
+const userStats = user.value!.stats
 
 const curr = new Date() // get current date
 const first = curr.getDate() - curr.getDay() // First day is the day of the month - the day of the week
@@ -85,7 +89,8 @@ function setWorkout(workout: Workout) {
 }
 </script>
 
-<template>
+<template >
+  <div v-if="user">
   <section class="hero is-link">
     <div class="hero-body">
       <p class="title">Welcome {{ user.firstName }}</p>
@@ -203,6 +208,7 @@ function setWorkout(workout: Workout) {
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <style scoped></style>
