@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { emptyStats, userNico, type User } from '@/model/user'
+import { userNico, type User } from '@/model/user'
 import { ref } from 'vue'
 import NicoPhoto from '../assets/NicoPhoto.jpg'
 import JohnPhoto from '../assets/JohnPhoto.jpg'
@@ -9,82 +9,8 @@ import PersonalInfo from '@/components/PersonalInfo.vue'
 const editUser = ref<User>(userNico)
 const editModal = ref<boolean>(false)
 
-const userList = ref<User[]>([
-  {
-    firstName: 'Nico',
-    lastName: 'DeMilio',
-    dob: new Date('1999-09-19'),
-    email: 'NicoDeMilio@email.com',
-    password: 'password',
-    biography: 'I am a student at SUNY new paltz',
-    photo: NicoPhoto,
-    workouts: [
-      {
-        name: 'ChoO cHOo cAlOo',
-        sets: 4,
-        exercises: [
-          {
-            exercise: {
-              name: '90/90 Hamstring',
-              equipment: 'body only',
-              primaryMuscles: ['hamstrings'],
-              instructions: [
-                'Lie on your back, with one leg extended straight out.',
-                'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
-                'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
-                'Repeat for 10-20 repetitions, and then switch to the other leg.',
-              ],
-              category: 'stretching',
-            },
-            reps: 15,
-          },
-        ],
-      },
-    ],
-    following: [],
-    username: 'NicoD',
-    id: 1,
-    stats: emptyStats,
-    admin: false,
-  },
-  {
-    firstName: 'John',
-    lastName: 'Doe',
-    dob: new Date('1999-09-19'),
-    email: 'coolBeans@email.com',
-    password: 'password',
-    biography: 'I am a student at SUNY new paltz',
-    photo: JohnPhoto,
-    workouts: [
-      {
-        name: 'ChoO cHOo cAlOo',
-        sets: 4,
-        exercises: [
-          {
-            exercise: {
-              name: '90/90 Hamstring',
-              equipment: 'body only',
-              primaryMuscles: ['hamstrings'],
-              instructions: [
-                'Lie on your back, with one leg extended straight out.',
-                'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
-                'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
-                'Repeat for 10-20 repetitions, and then switch to the other leg.',
-              ],
-              category: 'stretching',
-            },
-            reps: 15,
-          },
-        ],
-      },
-    ],
-    following: [],
-    username: 'JohnD',
-    id: 2,
-    stats: emptyStats,
-    admin: false,
-  },
-])
+const userList = ref()  //toDo: pull all users from server
+
 function saveChanges() {
   editModal.value = false
 }

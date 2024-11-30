@@ -4,13 +4,14 @@ const model = require("../model/users")
 const express = require("express")
 const app = express.Router()
 
-app.get("/", (req, res) => {//This is the route that will be used to get all the data from the users.json file
+app.get("/", (req, res, next) => {//This is the route that will be used to get all the data from the users.json file
     model
         .getAll()
         .then((data) => res.send(data))
         .catch(next)
 })
     .get("/:id", (req, res, next) => {//This is the route that will be used to get a specific user from the users.json file
+        const id = req.params.id
         model
             .getById(+id)
             .then((data) => res.send(data))
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {//This is the route that will be used to get all the
     })
 
     .patch("/:id", (req, res, next) => {//This is the route that will be used to Update a user in the users.json file
+        const id = req.params.id
         model
             .update(+id, req.body)
             .then((data) => res.send(data))
@@ -32,8 +34,11 @@ app.get("/", (req, res) => {//This is the route that will be used to get all the
     })
 
     .delete("/:id", (req, res, next) => {//This is the route that will be used to Delete a user from the users.json file
+        const id = req.params.id
         model
             .remove(+id)
-            .then((data) => res.sebd(data))
+            .then((data) => res.send(data))
             .catch(next)
     })
+
+    module.exports = app

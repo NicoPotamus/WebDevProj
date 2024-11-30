@@ -68,8 +68,17 @@ async function update(id, user) {
  * @returns {Promise<DataEnvelope<User>>} - resolves with the deleted user
  */
 async function remove(id) {
-    const userToRemove = getById(id)
-    data.items = data.items.filter(item => item.id != id)
+    const itemIndex = data.items.findIndex(usr => usr.id == id)
+    if(itemIndex === -1) {
+        throw {
+            isSuccess: false,
+            data: null,
+            status: 404,
+            error : "User not found"
+        }
+    }
+    data.items.splice(itemIndex, 1)
+
     return {
         isSuccess: true,
         data: userToRemove

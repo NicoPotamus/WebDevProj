@@ -9,7 +9,7 @@ export interface User {
   biography?: string
   photo: string
   workouts?: Workout[]
-  following?: User[]
+  following?: number[]//holds other friends id's
   stats: Stats
   username: string
   id: number

@@ -43,7 +43,14 @@ const possibleUsers = ref<User[]>([userNico])
       </div>
 
       <div class="navbar-end">
-        <div class="navbar-item has-dropdown is-hoverable">
+
+        <div v-if="user" class="navbar-item">
+          <button class="button is-danger" @click="signIn(null)">
+            <strong>Log Out</strong>
+          </button>
+        </div>
+
+        <div v-else class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link"> Log in </a>
 
           <div
@@ -61,12 +68,7 @@ const possibleUsers = ref<User[]>([userNico])
           </div>
         </div>
 
-        <div v-if="user" class="navbar-item">
-          <button class="button is-danger" @click="signIn(null)">
-            <strong>Log Out</strong>
-          </button>
-        </div>
-
+        
         <div class="navbar-item">
           <RouterLink class="button is-primary" to="/register">
             <strong>Sign up</strong>
