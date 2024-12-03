@@ -4,6 +4,7 @@ import type { DataListEnvelope } from './dataEnvelope'
 
 export function getAll(): DataListEnvelope<Exercise> {
   return {
+    isSuccessful: true,
     data: data.exercises
   }
 }

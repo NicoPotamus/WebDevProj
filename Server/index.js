@@ -4,6 +4,9 @@
 const express = require('express')
 const app = express()
 const userController = require('./controllers/users.js')
+const exerciseController=require("./controllers/exercises.js")
+const followingController = require('./controllers/following.js')
+const statsController = require('./controllers/stats.js')
 
 const PORT = 3000
 //MiddleWare
@@ -24,6 +27,10 @@ app.get("/", (req, res, next) => {
 })
     
     .use("/api/v1/user", userController) 
+    .use("/api/v1/exercise", exerciseController)   
+    .use("/api/v1/following", followingController)
+    .use("/api/v1/stats", statsController)
+
 
     .get("*", (req, res, next) => {
         res.sendFile(__dirname + "/dist/index.html")

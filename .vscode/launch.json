@@ -4,7 +4,7 @@
         "type": "node",
         "request": "launch",
         "name": "Launch Program",
-        "program": "${workspaceFolder}/index.js",
+        "program": "${workspaceFolder}\\server\\index.js",
         "runtimeExecutable": "nodemon"
     }
     ]

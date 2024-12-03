@@ -1,23 +1,31 @@
-
-const data = require("../data/users.json")
+const data = require("../data/users.json");
+const { getConnection } = require("./supabase");
+const connection = getConnection();
+const workoutModel = require("./workouts");
+const statsModel = require("./stats");
+const followingModel = require("./following");
 
 /**
  * @tmeplate T
  * @typedef {import("../../Client/src/model/dataEnvelope.ts").DataEnvelope} DataEnvelope
  * @typedef {import("../../Client/src/model/dataEnvelope.ts").DataListEnvelope} DataListEnvelope
+ * @typedef {import("../../Client/src/model/user.ts").User} User
  */
-
 
 /**
  * Get all users
  * @returns {Promise<DataListEnvelope<User>>} - resolves with all users
  */
 async function getAll() {
-    return {
-        isSuccess: true,
-        data: data.items,
-        total: data.items.length
-    }
+  const { data, error, count } = await connection
+    .from("users")
+    .select("*", { count: "estimated" });
+  return {
+    isSuccess: !error,
+    message: error?.message,
+    data: data,
+    total: count,
+  };
 }
 
 /**
@@ -25,11 +33,15 @@ async function getAll() {
  * @returns {Promise<DataEnvelope<User>>} - resolves with the user
  */
 async function getById(id) {
-    const item = data.items.find(item => item.id == id)
-    return {
-        isSuccess: !!item,//turn obj into boolean value
-        data: item
-    }
+  const { data, error } = await connection
+    .from("users")
+    .select("*, following(*)")
+    .eq("id", id)
+    .single();
+  return {
+    isSuccess: !!data, //turn obj into boolean value
+    data: data,
+  };
 }
 
 /**
@@ -38,28 +50,74 @@ async function getById(id) {
  * @returns {Promise<DataEnvelope<User>>} - resolves with the added user
  */
 async function add(user) {
-    user.id = data.items.reduce((prev, x) => (x.id > prev ? x.id : prev), 0) + 1
-    return {
-        isSuccess: true,
-        data: user
+  let statsData = null
+  if(user.stats) {
+    statsData = await statsModel.add(user.stats)
+  }else {
+    const stats = {
+      recordedWorkouts: [],
+      deadlift: 0,
+      squat: 0,
+      bench: 0
     }
+    statsData = await statsModel.add(stats)
+  }
+
+  const { data, error } = await connection
+    .from("users")
+    .insert([
+      {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        dob: user.dob,
+        email: user.email,
+        password: user.password,
+        biography: user.biography,
+        photo: user.photo,
+        username: user.username,
+        admin: user.admin,
+        stats_id: statsData.id
+      },
+    ])
+    .select("*")
+    .single();
+
+    if (user.workouts) {
+      for (const workout of user.workouts) {
+        await workoutModel.add(data.id, workout)
+      }
+    }
+
+  return {
+    isSuccess: true,
+    data: data,
+  };
 }
 
 /**
  * Update a user
  * @param {User} user - the user to update
  * @param {number} id - the id of the user to update
- * @returns {Promise<DataEnvelope<User>>} - resolves with the updated user 
+ * @returns {Promise<DataEnvelope<User>>} - resolves with the updated user
  */
 async function update(id, user) {
-    const userToUpate = await getById(id)
-    Object.assign(userToUpate, user)
-    return [
-        {
-            isSuccess: true,
-            data: userToUpate
-        }
-    ]
+  const { data, error } = await connection.from("users").update({
+    firstname: user.firstname,
+    lastname: user.lastname,
+    dob: user.dob,
+    email: user.email,
+    password: user.password,
+    biography: user.biography,
+    photo: user.photo,
+    username: user.username,
+    admin: user.admin,
+    updatedAt: new Date().toISOString(),
+  })
+  return   {
+      isSuccess: !error,
+      message: error?.message,
+      data: data,
+    }
 }
 
 /**
@@ -68,27 +126,37 @@ async function update(id, user) {
  * @returns {Promise<DataEnvelope<User>>} - resolves with the deleted user
  */
 async function remove(id) {
-    const itemIndex = data.items.findIndex(usr => usr.id == id)
-    if(itemIndex === -1) {
-        throw {
-            isSuccess: false,
-            data: null,
-            status: 404,
-            error : "User not found"
-        }
-    }
-    data.items.splice(itemIndex, 1)
-
-    return {
-        isSuccess: true,
-        data: userToRemove
-    }
+  const { data, error } = await connection
+    .from("users")
+    .delete()
+    .eq("id", id)
+    .select("*")
+    .single();
+  return [
+    {
+      isSuccess: !error,
+      message: error?.message,
+      data: data,
+    },
+  ];
+}
+async function seed() {
+  for (const user of data.items) {
+    await add(user);
+  }
+  return [
+    {
+      isSuccess: true,
+      data: data.items,
+    },
+  ];
 }
 
 module.exports = {
-    getAll,
-    getById,
-    add,
-    update,
-    remove
-}
+  getAll,
+  getById,
+  add,
+  update,
+  remove,
+  seed,
+};
