@@ -35,40 +35,56 @@ async function getAll() {
 async function getById(id) {
   const { data, error } = await connection
     .from("users")
-    .select("*, following(*)")
+    .select("*")
     .eq("id", id)
     .single();
   return {
-    isSuccess: !!data, //turn obj into boolean value
+    isSuccess: !error, //turn obj into boolean value
+    message: error?.message,
     data: data,
   };
 }
 
+/**
+ * login a  user
+ * @param {string} email - the email of the user
+ * @param {string} password - the password of the user
+ * @returns {Promise<DataEnvelope<User>>} - resolves with the user
+ */
+async function login(email, password) {
+  const { data, error } = await connection
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .eq("password", password)
+    .single();
+  if(!data) {
+    return {
+      isSuccess: false,
+      message: "Invalid email or password"
+    }
+  }
+  return {
+    isSuccess: !error, //turn obj into boolean value
+    data: data,
+    message: error?.message,
+  };
+}
 /**
  * Add a user
  * @param {User} user - the user to add
  * @returns {Promise<DataEnvelope<User>>} - resolves with the added user
  */
 async function add(user) {
-  let statsData = null
-  if(user.stats) {
-    statsData = await statsModel.add(user.stats)
-  }else {
-    const stats = {
-      recordedWorkouts: [],
-      deadlift: 0,
-      squat: 0,
-      bench: 0
-    }
-    statsData = await statsModel.add(stats)
-  }
+  const statsData =  await statsModel.add(user.stats) 
+  const statsId = statsData.data.id
 
   const { data, error } = await connection
     .from("users")
     .insert([
       {
-        firstname: user.firstname,
-        lastname: user.lastname,
+        firstName: user.firstName,
+        lastName: user.lastName,
         dob: user.dob,
         email: user.email,
         password: user.password,
@@ -76,11 +92,12 @@ async function add(user) {
         photo: user.photo,
         username: user.username,
         admin: user.admin,
-        stats_id: statsData.id
+        stats_id: statsId
       },
     ])
     .select("*")
     .single();
+    const userId = data.id
 
     if (user.workouts) {
       for (const workout of user.workouts) {
@@ -89,7 +106,8 @@ async function add(user) {
     }
 
   return {
-    isSuccess: true,
+    isSuccess: !error,
+    message: error?.message,
     data: data,
   };
 }
@@ -102,8 +120,8 @@ async function add(user) {
  */
 async function update(id, user) {
   const { data, error } = await connection.from("users").update({
-    firstname: user.firstname,
-    lastname: user.lastname,
+    firstName: user.firstName,
+    lastName: user.lastName,
     dob: user.dob,
     email: user.email,
     password: user.password,
@@ -159,4 +177,5 @@ module.exports = {
   update,
   remove,
   seed,
+  login
 };

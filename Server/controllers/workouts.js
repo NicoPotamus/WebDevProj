@@ -41,3 +41,4 @@ app.get("/:uId", (req, res, next) => {//get all workouts for user
             .then((data) => res.send(data))
             .catch(next)
     })
+    module.exports = app

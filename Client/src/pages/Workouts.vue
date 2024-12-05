@@ -1,33 +1,26 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import { type Workout, type WorkObj } from '../model/workoutModel'
-import { getAll, type Exercise } from '../model/exercises'
+import { getAll as getAllWorkouts, create, remove, update, type Workout, type WorkObj } from '../model/workoutModel'
+import { getAll as getAllExercises, type Exercise } from '../model/exercises'
+import { refUser } from '../model/sesssion'
+import type { DataEnvelope } from '@/model/dataEnvelope';
 
-const userWorkouts = ref<Workout[]>([
-  {
-    name: 'ChoO cHOo cAlOo',
-    sets: 4,
-    exercises: [
-      {
-        exercise: {
-          name: '90/90 Hamstring',
-          equipment: 'body only',
-          primaryMuscles: ['hamstrings'],
-          instructions: [
-            'Lie on your back, with one leg extended straight out.',
-            'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
-            'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
-            'Repeat for 10-20 repetitions, and then switch to the other leg.',
-          ],
-          category: 'stretching',
-        },
-        reps: 15,
-      },
-    ],
-  },
-])
+const user = refUser()
+const userWorkouts = ref<Workout[]>([])
+
+async function loadWorkouts() {
+  if (user.value) {
+    const response = await getAllWorkouts(user.value.id)
+    userWorkouts.value = response.data
+    console.log('userWorkouts:', userWorkouts.value)
+  }
+}
+
+loadWorkouts()
+
 const isModalOpen = ref(false)
+const isEditing = ref(false)
 
 function openModal() {
   isModalOpen.value = true
@@ -35,13 +28,26 @@ function openModal() {
 
 function closeModal() {
   isModalOpen.value = false
+  resetModal()
 }
 
-//--------------in modal-------------------------------------------------
+function resetModal() {
+  modalWorkout.value = {
+    name: '',
+    sets: 0,
+    exercises: [],
+    id: 0
+  }
+  exercisesInModal.value = []
+  dropdownState.value = []
+  isEditing.value = false
+}
+
 const modalWorkout = ref<Workout>({
   name: '',
   sets: 0,
   exercises: [],
+  id: 0
 })
 
 const exercisesInModal = ref<WorkObj[]>([])
@@ -52,33 +58,60 @@ function addExercise() {
   dropdownState.value.push(false)
 }
 
-function addWorkout() {
-  modalWorkout.value.exercises.push(...exercisesInModal.value)
-  userWorkouts.value.push(modalWorkout.value)
-  console.log(modalWorkout.value)
-  modalWorkout.value = {
-    name: '',
-    sets: 0,
-    exercises: [],
+async function addWorkout() {
+  try {
+    if (!modalWorkout.value.name || modalWorkout.value.sets <= 0 || exercisesInModal.value.length === 0) {
+      console.error('Please fill all required fields')
+      return
+    }
+
+    // Validate exercises
+    if (exercisesInModal.value.some(ex => !ex.exercise || ex.reps <= 0)) {
+      console.error('Please complete all exercise fields')
+      return
+    }
+
+    const workoutToSave = {
+      ...modalWorkout.value,
+      exercises: exercisesInModal.value
+    }
+
+    let response : DataEnvelope<Workout>
+    if (isEditing.value) {
+      response = await update(user.value?.id ?? 0, workoutToSave.id, workoutToSave)
+      console.log('using create')
+    } else {
+      response = await create(user.value?.id ?? 0, workoutToSave)
+      console.log('using create')
+    }
+
+    if (response.isSuccess) {
+      await loadWorkouts() // Reload all workouts to get fresh data
+      closeModal()
+    } else {
+      console.error('Error saving workout:', response.error)
+    }
+  } catch (error) {
+    console.error('Error saving workout:', error)
   }
-  dropdownState.value = []
-  closeModal()
 }
 
 function editWorkout(workout: Workout) {
   modalWorkout.value = { ...workout }
   exercisesInModal.value = workout.exercises.map(ex => ({ ...ex }))
   dropdownState.value = workout.exercises.map(() => false)
+  isEditing.value = true
   openModal()
 }
 
-function deleteWorkout(workout: Workout) {
-  const index = userWorkouts.value.findIndex(w => w.name === workout.name)
-  if (index !== -1) {
-    userWorkouts.value.splice(index, 1)
+async function deleteWorkout(workout: Workout) {
+  const removeWorkout = await remove(user.value?.id ?? 0, workout.id)
+  if (removeWorkout.isSuccess) {
+    await loadWorkouts()
+  } else {
+    console.error('Error deleting workout:', removeWorkout.error)
   }
 }
-//----------------------in dropdown----------------------------------------
 
 const panelTabs = ref([
   { active: true, name: 'All' },
@@ -89,8 +122,13 @@ const panelTabs = ref([
   { active: false, name: 'Abs' },
 ])
 
-const allExercises = getAll().data
-const displayedExercise = ref<Exercise[]>(allExercises)
+const allExercises = ref<Exercise[]>([])
+const displayedExercise = ref<Exercise[]>([])
+
+getAllExercises().then((data) => {
+  allExercises.value = data.data
+  displayedExercise.value = data.data
+})
 
 function updateTab(index: number) {
   panelTabs.value.forEach((tab, i) => {
@@ -99,19 +137,19 @@ function updateTab(index: number) {
 }
 
 function filterAll() {
-  displayedExercise.value = allExercises
+  displayedExercise.value = allExercises.value
   updateTab(0)
 }
 
 function filterChest() {
-  displayedExercise.value = allExercises.filter(exercise =>
+  displayedExercise.value = allExercises.value.filter(exercise =>
     exercise.primaryMuscles.includes('chest'),
   )
   updateTab(1)
 }
 
 function filterBack() {
-  displayedExercise.value = allExercises.filter(
+  displayedExercise.value = allExercises.value.filter(
     exercise =>
       exercise.primaryMuscles.includes('lower back') ||
       exercise.primaryMuscles.includes('upper back') ||
@@ -122,7 +160,7 @@ function filterBack() {
 }
 
 function filterArms() {
-  displayedExercise.value = allExercises.filter(
+  displayedExercise.value = allExercises.value.filter(
     exercise =>
       exercise.primaryMuscles.includes('shoulders') ||
       exercise.primaryMuscles.includes('biceps') ||
@@ -133,7 +171,7 @@ function filterArms() {
 }
 
 function filterLegs() {
-  displayedExercise.value = allExercises.filter(
+  displayedExercise.value = allExercises.value.filter(
     exercise =>
       exercise.primaryMuscles.includes('quadriceps') ||
       exercise.primaryMuscles.includes('hamstrings') ||
@@ -144,7 +182,7 @@ function filterLegs() {
 }
 
 function filterAbs() {
-  displayedExercise.value = allExercises.filter(exercise =>
+  displayedExercise.value = allExercises.value.filter(exercise =>
     exercise.primaryMuscles.includes('abdominals'),
   )
   updateTab(5)
@@ -166,7 +204,7 @@ function filterAbs() {
         <a
           class="panel-block is-block"
           v-for="workout in userWorkouts"
-          :key="workout.name"
+          :key="workout.id"
           @click="editWorkout(workout)"
         >
           <span class="panel-icon">
@@ -194,7 +232,7 @@ function filterAbs() {
         <div class="modal-background" @click="closeModal"></div>
         <div class="modal-card">
           <header class="modal-card-head">
-            <p class="modal-card-title">Create Task</p>
+            <p class="modal-card-title">{{ isEditing ? 'Edit Workout' : 'Create Workout' }}</p>
             <button
               class="delete"
               @click="closeModal"
@@ -208,7 +246,7 @@ function filterAbs() {
                 <input
                   class="input"
                   type="text"
-                  placeholder="Text input"
+                  placeholder="Workout name"
                   v-model="modalWorkout.name"
                 />
               </div>
@@ -234,7 +272,7 @@ function filterAbs() {
                         aria-haspopup="true"
                         aria-controls="dropdown-menu"
                       >
-                        <span v-if="exercise.exercise === null">Exercise</span>
+                        <span v-if="exercise.exercise === null">Select Exercise</span>
                         <span v-else>{{ exercise.exercise.name }}</span>
                         <span class="icon is-small">
                           <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -301,7 +339,7 @@ function filterAbs() {
                   <input
                     class="input"
                     type="number"
-                    placeholder="Text input"
+                    placeholder="Number of reps"
                     v-model="exercise.reps"
                   />
                 </div>
@@ -313,7 +351,7 @@ function filterAbs() {
                 <input
                   class="input"
                   type="number"
-                  placeholder="Text input"
+                  placeholder="Number of sets"
                   v-model="modalWorkout.sets"
                 />
               </div>
@@ -322,7 +360,7 @@ function filterAbs() {
           <footer class="modal-card-foot">
             <div class="buttons">
               <button class="button is-success" @click="addWorkout">
-                Save changes
+                {{ isEditing ? 'Update' : 'Save' }}
               </button>
               <button class="button" @click="closeModal">Cancel</button>
               <button class="button" @click="addExercise">Add Exercise</button>

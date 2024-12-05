@@ -9,46 +9,71 @@ const connection = getConnection();
  */
 
 /**
- * get a users stats
+ * Get stats by ID
  * @param {Number} id
- * @returns {Stats}
+ * @returns {Promise<DataEnvelope<Stats>>}
  */
 async function getById(id) {
   const { data, error, count } = await connection
     .from("stats")
     .select("*")
-    .eq("id", id);
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    return {
+      isSuccess: false,
+      message: error.message,
+      data: null,
+      total: 0,
+    };
+  }
+
+  // Ensure data.recordedworkouts is not null or undefined
+  const recordedWorkouts = data.recordedworkouts ? JSON.parse(data.recordedworkouts) : {};
+
+  const deserializeStats = {
+    ...data,
+    recordedWorkouts: recordedWorkouts,
+  };
 
   return {
-    isSuccess: !error,
-    message: error?.message,
-    data: data,
+    isSuccess: true,
+    message: null,
+    data: deserializeStats,
     total: count,
   };
 }
+
 /**
- * Add a users stats
+ * Add a user's stats
  * @param {Stats} stats
- * @param {Number} id
- * @returns {Stats}
+ * @returns {Promise<DataEnvelope<Stats>>}
  */
 async function add(stats) {
   const recordedWorkoutsJSON = JSON.stringify(stats.recordedWorkouts);
   const { data, error } = await connection
     .from("stats")
     .insert({
-      recordedWorkouts: recordedWorkoutsJSON,
+      recordedworkouts: recordedWorkoutsJSON,
       deadlift: stats.deadlift,
       squat: stats.squat,
       bench: stats.bench,
     })
     .select("*")
-    .single()
+    .single();
 
+  if (error) {
+    return {
+      isSuccess: false,
+      message: error.message,
+      data: null,
+    };
+  }
 
   return {
-    isSuccess: !error,
-    message: error?.message,
+    isSuccess: true,
+    message: "Stats added successfully",
     data: data,
   };
 }

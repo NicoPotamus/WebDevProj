@@ -1,5 +1,5 @@
 ###
-GET http://localhost:3000/api/v1/user/
+GET http://localhost:3000/api/v1/user/12
 
 ###
 POST http://localhost:3000/api/v1/user/seed
@@ -19,10 +19,10 @@ POST http://localhost:3000/api/v1/user
 Content-Type: application/json
 
     {
-      "firstName": "Alex",
+      "firstName": "cool",
       "lastName": "Smith",
       "dob": "2000-03-15",
-      "email": "AlexSmith@email.com",
+      "email": "attempt101@gmail.com",
       "password": "securepass123",
       "biography": "Fitness enthusiast and nature lover.",
       "photo": "alex.jpg",
@@ -53,7 +53,7 @@ Content-Type: application/json
         }
       ],
       "following": [1],
-      "username": "AlexS",
+      "username": "attempt101",
       "id": 2,
       "admin": false,
       "stats": {
@@ -64,3 +64,43 @@ Content-Type: application/json
       }
 
 }
+
+
+###
+GET http://localhost:3000/api/v1/user/attempt101@gmail.com/securepass123
+
+###
+GET http://localhost:3000/api/v1/workouts/12
+###
+POST http://localhost:3000/api/v1/workouts/12
+Content-Type: application/json
+
+{
+  "name": "Morning Workout",
+  "sets": 3,
+  "exercises": [
+    {
+      "exercise": {
+        "id": 874,
+        "name": "Push-up",
+        "equipment": "None",
+        "category": "Strength",
+        "instructions": "Do a push-up"
+      },
+      "reps": 10
+    },
+    {
+      "exercise": {
+        "id": 875,
+        "name": "Squat",
+        "equipment": "None",
+        "category": "Strength",
+        "instructions": "Do a squat"
+      },
+      "reps": 15
+    }
+  ]
+}
+
+###
+GET http://localhost:3000/api/v1/stats/11

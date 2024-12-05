@@ -18,7 +18,7 @@ const selectedFriend = ref<User>({
   following: [],
   username: '',
   id: 0,
-  stats: emptyStats,
+  stats: emptyStats(),
   admin: false,
 })
 

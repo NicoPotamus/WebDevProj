@@ -2,150 +2,236 @@ const { getConnection } = require("./supabase");
 const connection = getConnection();
 
 /**
- * @tmeplate T
+ * @template T
  * @typedef {import("../../Client/src/model/dataEnvelope.ts").DataEnvelope} DataEnvelope
  * @typedef {import("../../Client/src/model/dataEnvelope.ts").DataListEnvelope} DataListEnvelope
  * @typedef {import("../../Client/src/model/workoutModel.ts").Workout} Workout
  */
 
 /**
- *
+ * transform raw workout data into a more usable format
+ * @param {*} rawWorkout 
+ * @returns { Workout}
+ */
+function transformWorkoutData(rawWorkout) {
+  return {
+    id: rawWorkout.id,
+    name: rawWorkout.name,
+    sets: rawWorkout.sets,
+    exercises: rawWorkout.workoutexercises.map(we => ({
+      exercise: {
+        id: we.exercises.id,
+        name: we.exercises.name,
+        equipment: we.exercises.equipment,
+        category: we.exercises.category,
+        instructions: we.exercises.instructions
+      },
+      reps: we.reps
+    }))
+  };
+}
+
+/**
  * @param {Number} uId
- * @returns {Promise<DataListEnvelope<Workout>>} - resolves with all workouts
+ * @returns {Promise<DataListEnvelope<Workout>>}
  */
 async function getAll(uId) {
   const { data, error, count } = await connection
-    .from("users")
-    .select("workouts(*)", { count: "estimated" })
-    .eq("id", uId);
+    .from("workouts")
+    .select(`
+      id, 
+      name, 
+      sets,
+      workoutexercises (
+        reps,
+        exercises (
+          id,
+          name,
+          equipment,
+          category,
+          instructions
+        )
+      )
+    `)
+    .eq("user_id", uId);
+
+  if (error) {
+    return {
+      isSuccess: false,
+      message: error.message,
+      data: null,
+      total: 0
+    };
+  }
 
   return {
-    isSuccess: !error,
-    message: error?.message,
-    data: data,
-    total: count,
+    isSuccess: true,
+    data: data.map(transformWorkoutData),
+    total: count
   };
 }
 
 /**
- *
  * @param {Number} uId
  * @param {Number} id
- * @returns {Promise<DataEnvelope<Workout>>} - resolves with the workout
+ * @returns {Promise<DataEnvelope<Workout>>}
  */
 async function getById(uId, id) {
   const { data, error } = await connection
-    .from("Workouts")
-    .select(
-      ` id, 
+    .from("workouts")
+    .select(`
+      id, 
       name, 
-      sets, 
-      user_id, 
-      Exercises (id, name, equipment, category, instructions, WorkoutExercises (reps)) `
-    )
-    .eq("user_id", userId)
-    .eq("id", workoutId);
+      sets,
+      workoutexercises (
+        reps,
+        exercises (
+          id,
+          name,
+          equipment,
+          category,
+          instructions
+        )
+      )
+    `)
+    .eq("user_id", uId)
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    return {
+      isSuccess: false,
+      message: error.message,
+      data: null
+    };
+  }
 
   return {
-    isSuccess: !!data,
-    data: data,
+    isSuccess: true,
+    data: transformWorkoutData(data)
   };
 }
 
 /**
- * add a workout to a user
  * @param {Number} uId
  * @param {Workout} workout
- * @returns
+ * @returns {Promise<DataEnvelope<Workout>>}
  */
 async function add(uId, workout) {
-  const { data } = await connection
+  const { data: workoutData, error: workoutError } = await connection
     .from("workouts")
-    .insert({
+    .insert([{
       name: workout.name,
       sets: workout.sets,
       user_id: uId,
-    })
-    .select ("*")
+    }])
+    .select("*")
     .single();
-  const { error } = await connection.from("workoutExercises").insert(
-    workout.exercises.map((exercise) => ({
-      workout_id: data.id,
-      exercise_id: exercise.id,
-      reps: exercise.reps,
-    }))
-  );
 
-  return {
-    isSuccess: !error,
-    message: error?.message,
-    data: data,
-  };
+  if (workoutError) {
+    console.error("Error inserting workout:", workoutError.message);
+    return {
+      isSuccess: false,
+      message: workoutError.message,
+      data: null
+    };
+  }
+  const workoutShell = workoutData
+  const exercisesToInsert = workout.exercises.map(exercise => ({
+    workout_id: workoutShell.id,
+    exercise_id: exercise.exercise.id,
+    reps: exercise.reps,
+  }));
+
+  const { error: exerciseError } = await connection
+    .from("workoutexercises")
+    .insert(exercisesToInsert);
+
+  if (exerciseError) {
+    console.error("Error inserting workout exercises:", exerciseError.message);
+    return {
+      isSuccess: false,
+      message: exerciseError.message,
+      data: null
+    };
+  }
+
+  return getById(uId, workoutData.id);
 }
 
 /**
- * update a workout
  * @param {Number} uId
  * @param {Number} id
  * @param {Workout} workout
  * @returns {Promise<DataEnvelope<Workout>>}
  */
 async function update(uId, id, workout) {
-  const { data } = await connection
+  const { error: workoutError } = await connection
     .from("workouts")
     .update({
       name: workout.name,
       sets: workout.sets,
     })
     .eq("id", id)
-    .eq("user_id", uId)
-    .single()
+    .eq("user_id", uId);
+
+  if (workoutError) {
+    return {
+      isSuccess: false,
+      message: workoutError.message,
+      data: null
+    };
+  }
 
   await connection
-    .from("workoutExercises")
+    .from("workoutexercises")
     .delete()
     .eq("workout_id", id);
 
-  const { error } = await connection
-    .from("workoutExercises")
+  const { error: exerciseError } = await connection
+    .from("workoutexercises")
     .insert(
-      workout.exercises.map((exercise) => ({
-      workout_id: id,
-      exercise_id: exercise.id,
-      reps: exercise.reps,
-    }))
-  );
+      workout.exercises.map(exercise => ({
+        workout_id: id,
+        exercise_id: exercise.exercise.id,
+        reps: exercise.reps,
+      }))
+    );
 
-  return {
-    isSuccess: !error,
-    message: error?.message,
-    data: data,
-  };
+  if (exerciseError) {
+    return {
+      isSuccess: false,
+      message: exerciseError.message,
+      data: null
+    };
+  }
+
+  return getById(uId, id);
 }
 
 /**
- * delete a workout
  * @param {Number} uId
  * @param {Number} id
  * @returns {Promise<DataEnvelope<Workout>>}
  */
 async function remove(uId, id) {
-  const { data } = await connection
+  await connection
+    .from("workoutexercises")
+    .delete()
+    .eq("workout_id", id);
+
+  const { data, error } = await connection
     .from("workouts")
     .delete()
     .eq("id", id)
     .eq("user_id", uId)
     .single();
 
-  const { error } = await connection
-    .from("workoutExercises")
-    .delete()
-    .eq("workout_id", id);
-
   return {
-    isSuccess: !!data,
-    data: data,
-  }
+    isSuccess: !error,
+    message: error?.message,
+    data: data
+  };
 }
 
 module.exports = {

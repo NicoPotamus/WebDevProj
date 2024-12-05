@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { refUser, signIn } from '@/model/sesssion';
-import type { User } from '@/model/user'
-import { userNico } from '@/model/user'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const isOpen = ref(false)
 const user = refUser()
-const possibleUsers = ref<User[]>([userNico])
 
 </script>
 
@@ -50,22 +47,10 @@ const possibleUsers = ref<User[]>([userNico])
           </button>
         </div>
 
-        <div v-else class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link"> Log in </a>
-
-          <div
-            class="navbar-dropdown"
-            v-for="userP in possibleUsers"
-            :key="userP.id"
-          >
-            <a class="navbar-item" @click="signIn(userP)">
-              {{ userP.firstName }} {{ userP.lastName }}
-            </a>
-            <hr class="navbar-divider" />
-            <RouterLink class="button is-light" to="/signin">
+        <div v-else class="navbar-item">
+          <RouterLink class="button is-light" to="/signin">
               Log in
-            </RouterLink>
-          </div>
+          </RouterLink>
         </div>
 
         

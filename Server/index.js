@@ -7,6 +7,7 @@ const userController = require('./controllers/users.js')
 const exerciseController=require("./controllers/exercises.js")
 const followingController = require('./controllers/following.js')
 const statsController = require('./controllers/stats.js')
+const workoutController = require('./controllers/workouts.js')
 
 const PORT = 3000
 //MiddleWare
@@ -25,11 +26,12 @@ app.use(express.static(__dirname + "/dist"))
 app.get("/", (req, res, next) => {
     res.send('HomePage')
 })
-    
+    .use("/api/v1/workouts", workoutController)
     .use("/api/v1/user", userController) 
-    .use("/api/v1/exercise", exerciseController)   
+    .use("/api/v1/exercises", exerciseController)   
     .use("/api/v1/following", followingController)
     .use("/api/v1/stats", statsController)
+    
 
 
     .get("*", (req, res, next) => {

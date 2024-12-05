@@ -1,12 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { userNico, type User } from '@/model/user'
+import { type User } from '@/model/user'
 import { ref } from 'vue'
-import NicoPhoto from '../assets/NicoPhoto.jpg'
-import JohnPhoto from '../assets/JohnPhoto.jpg'
 import PersonalInfo from '@/components/PersonalInfo.vue'
 
-const editUser = ref<User>(userNico)
+const editUser = ref<User>()
 const editModal = ref<boolean>(false)
 
 const userList = ref()  //toDo: pull all users from server
@@ -91,7 +89,7 @@ function fEditUser(user: User) {
           <p class="modal-card-title">Edit UserStats</p>
         </header>
         <section class="modal-card-body">
-          <PersonalInfo :user="editUser" />
+          <PersonalInfo :user="editUser!" />
 
           <button
             class="modal-close is-large"

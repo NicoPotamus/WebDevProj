@@ -46,5 +46,14 @@ app.get("/", (req, res, next) => {//This is the route that will be used to get a
             .then((data) => res.send(data))
             .catch(next)
     })
+    .get("/:email/:password", (req, res, next) => {//This is the route that will be used to get a user by email and password from the users.json file
+        const email = req.params.email
+        const password = req.params.password
+        model
+            .login(email, password)
+            .then((data) => res.send(data))
+            .catch(next)
+    })
+
 
     module.exports = app

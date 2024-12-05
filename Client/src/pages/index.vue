@@ -2,50 +2,73 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Workout } from '@/model/workoutModel'
-import { refUser } from '@/model/sesssion';
-import { useRouter } from 'vue-router';
+import { refUser } from '@/model/sesssion'
+import { useRouter } from 'vue-router'
+import { getStats, updateStats, type Stats } from '@/model/user'
+import { getAll } from '@/model/workoutModel'
 
 const router = useRouter()
-const user = refUser();
-if(!user.value) {
+const user = refUser()
+
+if (!user.value) {
   router.push('/Signin')
 }
-const userStats = user.value!.stats
+
+const userStats = ref<Stats>({
+  recordedWorkouts: {},
+  deadlift: 0,
+  bench: 0,
+  squat: 0,
+  id: 1,
+})
+const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
+
+async function loadStats() {
+  if (user.value) {
+    const response = await getStats(user.value.id)
+    user.value.stats = response.data
+    console.log('userWorkouts:', user.value.stats)
+  }
+}
+async function loadWorkouts() {
+  if (user.value) {
+    const response = await getAll(user.value.id)
+    user.value.workouts = response.data
+    console.log('userWorkouts:', user.value.workouts)
+  }
+}
+loadWorkouts()
+loadStats()
 
 const today = new Date() // get current date
 const sDay = today.getDate() - today.getDay()
 const sundayDate = new Date(today.setDate(sDay)).toDateString()
-
-// First day is the day of the month - the day of the week
-
-const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
-console.log('userWorkouts: before addition', userStats?.recordedWorkouts)
-
-compileStats()
+console.log('sundayDate', sundayDate)
 
 function stringifyDate(date: Date): string {
   const str =
     '' +
     date.getFullYear() +
     '-' +
-    (date.getMonth() + 1) +
+    (date.getMonth() + 1).toString().padStart(2, '0') +
     '-' +
-    String(date.getDate()).padStart(2, '0') +
-    ''
+    (date.getDate()).toString().padStart(2, '0')
   return str
 }
 
 function compileStats() {
-  const curr = new Date() // get current date
-  const first = curr.getDate() - curr.getDay()
+  if (!userStats.value) return
+
+  const workouts = userStats.value.recordedWorkouts
+  const curr = new Date()
+  const first = curr.getDate() - curr.getDay() // Get the first day of the current week (Monday)
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(curr)
     date.setDate(first + i)
-    console.log('date: ', date)
-    const userStatMap = userStats?.recordedWorkouts
-    weeklyStats.value[i] = userStatMap?.get(stringifyDate(date))?.length ?? 0
-    console.log("value for date ^^", weeklyStats.value[i])
+    const dateString = stringifyDate(date)
+    console.log('dateString', dateString)
+    weeklyStats.value[i] = workouts[dateString]?.length || 0
   }
 }
 
@@ -54,24 +77,30 @@ const workoutDate = ref<string>('') //default date of today
 const workoutPerformed = ref<Workout>()
 
 function logWorkout() {
-  console.log('workout DAte', new Date(workoutDate.value))
-  
+  console.log('workout DAte', workoutDate.value)
+
   if (workoutDate.value && workoutPerformed.value) {
-    const workouts = userStats?.recordedWorkouts.get(workoutDate.value)
-    console.log(workouts)
+    const workouts = userStats.value?.recordedWorkouts[workoutDate.value]//get completed workouts for given day
     if (workouts) {
-      workouts.push(workoutPerformed.value)
-      userStats?.recordedWorkouts.set(workoutDate.value, workouts)
+      workouts.push(workoutPerformed.value.id)
+      if (userStats.value && userStats.value.recordedWorkouts) {
+        userStats.value.recordedWorkouts[workoutDate.value] = workouts
+      }
     } else {
-      userStats?.recordedWorkouts.set(workoutDate.value, [
-        workoutPerformed.value,
-      ])
+      if (userStats.value && userStats.value.recordedWorkouts) {
+        userStats.value.recordedWorkouts[workoutDate.value] = [
+          workoutPerformed.value.id,
+        ]
+      }
+    }
+    if (userStats.value?.id !== undefined) {
+      updateStats(userStats.value.id, userStats.value)
     }
   }
   compileStats()
   workoutDate.value = ''
   workoutPerformed.value = undefined
-  console.log('userWorkouts: after addition', userStats?.recordedWorkouts)
+  console.log('userWorkouts: after addition', userStats.value?.recordedWorkouts)
 }
 
 //Dropdown
@@ -86,126 +115,126 @@ function setWorkout(workout: Workout) {
 }
 </script>
 
-<template >
+<template>
   <div v-if="user">
-  <section class="hero is-link">
-    <div class="hero-body">
-      <p class="title">Welcome {{ user.firstName }}</p>
-    </div>
-  </section>
-
-  <div class="columns">
-    <div class="column is-half">
-      <div class="box">
-        <section class="hero">
-          <div class="hero-body">
-            <p class="title">Weekly Stats</p>
-            <p class="subtitle">Week of: {{ sundayDate.substring(4) }}</p>
-          </div>
-        </section>
-
-        <p>Sunday</p>
-        <progress class="progress" :value="weeklyStats[0]" max="3">
-          15%
-        </progress>
-
-        <p>Monday</p>
-        <progress class="progress" :value="weeklyStats[1]" max="3">
-          15%
-        </progress>
-
-        <p>Tuesday</p>
-        <progress class="progress" :value="weeklyStats[2]" max="3">
-          15%
-        </progress>
-
-        <p>Wednesday</p>
-        <progress class="progress" :value="weeklyStats[3]" max="3">
-          15%
-        </progress>
-
-        <p>Thursday</p>
-        <progress class="progress" :value="weeklyStats[4]" max="3">
-          15%
-        </progress>
-
-        <p>Friday</p>
-        <progress class="progress" :value="weeklyStats[5]" max="3">
-          15%
-        </progress>
-
-        <p>Saturday</p>
-        <progress class="progress" :value="weeklyStats[6]" max="3">
-          15%
-        </progress>
+    <section class="hero is-link">
+      <div class="hero-body">
+        <p class="title">Welcome {{ user.firstName }}</p>
       </div>
-    </div>
-    <div class="column is-half">
-      <div class="box">
-        <section class="hero">
-          <h2 class="title">Personal Records</h2>
-          <span></span>
-          <p class="subtitle">
-            DeadLift: <b>{{ user.stats ? user.stats.deadlift : '0' }}</b>
-          </p>
-          <p class="subtitle">
-            Bench: <b>{{ user.stats ? user.stats.bench : '0' }}</b>
-          </p>
-          <p class="subtitle">
-            Squat: <b>{{ user.stats ? user.stats.squat : '0' }}</b>
-          </p>
-        </section>
-      </div>
-      <div class="box">
-        <section class="hero">
-          <h2 class="title">Record Workout</h2>
-          <span></span>
-        </section>
+    </section>
 
-        <div class="block">
-          <div class="dropdown" :class="{ 'is-active': dropdownState }">
-            <div class="box">
-              <div class="dropdown-trigger" @click="toggleDropdown()">
-                <button class="card-header-icon" aria-label="more options">
-                  <p class="card-header-title">
-                    {{ workoutPerformed ? workoutPerformed.name : 'Workouts' }}
-                  </p>
-                  <span class="icon">
-                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                  </span>
-                </button>
-              </div>
-              <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                <div
-                  class="card-content"
-                  v-for="workout in user.workouts"
-                  :key="workout.name"
-                >
-                  <div class="content">
-                    <div class="dropdown-content">
-                      <a class="dropdown-item" @click="setWorkout(workout)">
-                        {{ workout.name }}
-                      </a>
+    <div class="columns">
+      <div class="column is-half">
+        <div class="box">
+          <section class="hero">
+            <div class="hero-body">
+              <p class="title">Weekly Stats</p>
+              <p class="subtitle">Week of: {{ sundayDate.substring(4) }}</p>
+            </div>
+          </section>
+
+          <p>Sunday</p>
+          <progress class="progress" :value="weeklyStats[0]" max="3">
+            15%
+          </progress>
+
+          <p>Monday</p>
+          <progress class="progress" :value="weeklyStats[1]" max="3">
+            15%
+          </progress>
+
+          <p>Tuesday</p>
+          <progress class="progress" :value="weeklyStats[2]" max="3">
+            15%
+          </progress>
+
+          <p>Wednesday</p>
+          <progress class="progress" :value="weeklyStats[3]" max="3">
+            15%
+          </progress>
+
+          <p>Thursday</p>
+          <progress class="progress" :value="weeklyStats[4]" max="3">
+            15%
+          </progress>
+
+          <p>Friday</p>
+          <progress class="progress" :value="weeklyStats[5]" max="3">
+            15%
+          </progress>
+
+          <p>Saturday</p>
+          <progress class="progress" :value="weeklyStats[6]" max="3">
+            15%
+          </progress>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="box">
+          <section class="hero">
+            <h2 class="title">Personal Records</h2>
+            <span></span>
+            <p class="subtitle">
+              DeadLift: <b>{{ user.stats ? user.stats.deadlift : '0' }}</b>
+            </p>
+            <p class="subtitle">
+              Bench: <b>{{ user.stats ? user.stats.bench : '0' }}</b>
+            </p>
+            <p class="subtitle">
+              Squat: <b>{{ user.stats ? user.stats.squat : '0' }}</b>
+            </p>
+          </section>
+        </div>
+        <div class="box">
+          <section class="hero">
+            <h2 class="title">Record Workout</h2>
+            <span></span>
+          </section>
+
+          <div class="block">
+            <div class="dropdown" :class="{ 'is-active': dropdownState }">
+              <div class="box">
+                <div class="dropdown-trigger" @click="toggleDropdown()">
+                  <button class="card-header-icon" aria-label="more options">
+                    <p class="card-header-title">
+                      {{ workoutPerformed ? workoutPerformed.name : 'Workouts' }}
+                    </p>
+                    <span class="icon">
+                      <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                  </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div
+                    class="card-content"
+                    v-for="workout in user.workouts"
+                    :key="workout.name"
+                  >
+                    <div class="content">
+                      <div class="dropdown-content">
+                        <a class="dropdown-item" @click="setWorkout(workout)">
+                          {{ workout.name }}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="label" for="date"> Date </label>
-          <input type="date" class="input" v-model="workoutDate" />
-        </div>
+          <div class="field">
+            <label class="label" for="date"> Date </label>
+            <input type="date" class="input" v-model="workoutDate" />
+          </div>
 
-        <button class="button is-primary" @click="logWorkout()">
-          Log Workout
-        </button>
+          <button class="button is-primary" @click="logWorkout()">
+            Log Workout
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scoped></style>

@@ -3,10 +3,10 @@
 export interface DataEnvelope<T> {
     data: T
     error?: string
-    isSuccessful: boolean
+    isSuccess: boolean
   }
   
   export interface DataListEnvelope<T> extends DataEnvelope<T[]> {
     data: T[]
-    error?: string
+    count: number
   }
