@@ -3,8 +3,7 @@ const { getConnection } = require("./supabase");
 const connection = getConnection();
 const workoutModel = require("./workouts");
 const statsModel = require("./stats");
-const followingModel = require("./following");
-
+const jwt = require("jsonwebtoken")
 /**
  * @tmeplate T
  * @typedef {import("../../Client/src/model/dataEnvelope.ts").DataEnvelope} DataEnvelope
@@ -35,7 +34,7 @@ async function getAll() {
 async function getById(id) {
   const { data, error } = await connection
     .from("users")
-    .select("*")
+    .select("firstName, lastName, username, biography, photo")
     .eq("id", id)
     .single();
   return {
@@ -58,15 +57,21 @@ async function login(email, password) {
     .eq("email", email)
     .eq("password", password)
     .single();
-  if(!data) {
+
+  if (!data) {
     return {
       isSuccess: false,
-      message: "Invalid email or password"
-    }
+      message: "Invalid email or password",
+    };
   }
+
+  const token = jwt.sign({ email: data.email }, process.env.JWT_SECRET_KEY, {
+    expiresIn: 86400, // 24 hours
+  });
+
   return {
-    isSuccess: !error, //turn obj into boolean value
-    data: data,
+    isSuccess: !error,
+    data: { ...data, token },
     message: error?.message,
   };
 }

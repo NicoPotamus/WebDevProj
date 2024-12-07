@@ -1,50 +1,54 @@
-//Nicolas DeMilio
+require("dotenv").config();
+const express = require("express");
+const app = express();
+const workoutController = require("./controllers/workouts.js");
+const userController = require("./controllers/users.js");
+const exerciseController = require("./controllers/exercises.js");
+const followingController = require("./controllers/following.js");
+const statsController = require("./controllers/stats.js");
+const loginController = require("./controllers/login.js");
+const authenticateJWT = require("./middlewar/auth.js");
 
-// Importing the express module
-const express = require('express')
-const app = express()
-const userController = require('./controllers/users.js')
-const exerciseController=require("./controllers/exercises.js")
-const followingController = require('./controllers/following.js')
-const statsController = require('./controllers/stats.js')
-const workoutController = require('./controllers/workouts.js')
+const PORT = 3000;
 
-const PORT = 3000
-//MiddleWare
+// Middleware
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Methods", "*")
-    res.header("Access-Control-Allow-Headers", "*")
-    next()
-})
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "*");
+    res.header("Access-Control-Allow-Headers", "*");
+    next();
+});
 
-app.use(express.json())
-app.use(express.static(__dirname + "/dist"))
+app.use(express.json());
+app.use(express.static(__dirname + "/dist"));
 
-
-//routes -> controller
+// Public routes
 app.get("/", (req, res, next) => {
-    res.send('HomePage')
+    res.send('HomePage');
 })
-    .use("/api/v1/workouts", workoutController)
-    .use("/api/v1/user", userController) 
-    .use("/api/v1/exercises", exerciseController)   
-    .use("/api/v1/following", followingController)
-    .use("/api/v1/stats", statsController)
-    
 
+// Login route (public)
+.use("/api/v1/user/login", loginController)
 
-    .get("*", (req, res, next) => {
-        res.sendFile(__dirname + "/dist/index.html")
-    })
+// Protected routes
+app.use("/api/v1/workouts", authenticateJWT, workoutController);
+app.use("/api/v1/user", authenticateJWT, userController);
+app.use("/api/v1/exercises", authenticateJWT, exerciseController);
+app.use("/api/v1/following", authenticateJWT, followingController);
+app.use("/api/v1/stats", authenticateJWT, statsController);
+
+app.get("*", (req, res, next) => {
+    res.sendFile(__dirname + "/dist/index.html");
+});
 
 // Error Handling
 app.use((err, req, res, next) => {
-    console.error(err)
-    res.status(err.status ?? 500).send(err)
-})
+    console.error(err);
+    res.status(err.status ?? 500).send(err);
+});
 
 app.listen(PORT, (err, data) => {
-    console.log(`Server is running on port http://localhost:${PORT}`)
-})
+    console.log(`Server is running on port http://localhost:${PORT}`);
+});
 
+module.exports = app;
