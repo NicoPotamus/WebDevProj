@@ -1,10 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
+import { getFollowing } from '@/model/following';
 import { emptyStats, type User } from '@/model/user'
-import type { Workout } from '@/model/workoutModel'
+import { getOne, type Workout } from '@/model/workoutModel'
 import { ref } from 'vue'
-import NicoPhoto from '../assets/NicoPhoto.jpg'
-import JohnPhoto from '../assets/JohnPhoto.jpg'
+
+import { refUser }from '@/model/sesssion'
+
+const user = refUser()
 
 const selectedFriend = ref<User>({
   firstName: '',
@@ -22,82 +25,12 @@ const selectedFriend = ref<User>({
   admin: false,
 })
 
-const friends = ref<User[]>([
-  {
-    firstName: 'Nico',
-    lastName: 'DeMilio',
-    dob: new Date('1999-09-19'),
-    email: 'NicoDeMilio@email.com',
-    password: 'password',
-    biography: 'I am a student at SUNY new paltz',
-    photo: NicoPhoto,
-    workouts: [
-      {
-        name: 'ChoO cHOo cAlOo',
-        sets: 4,
-        exercises: [
-          {
-            exercise: {
-              name: '90/90 Hamstring',
-              equipment: 'body only',
-              primaryMuscles: ['hamstrings'],
-              instructions: [
-                'Lie on your back, with one leg extended straight out.',
-                'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
-                'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
-                'Repeat for 10-20 repetitions, and then switch to the other leg.',
-              ],
-              category: 'stretching',
-            },
-            reps: 15,
-          },
-        ],
-      },
-    ],
-    following: [],
-    username: 'NicoD',
-    id: 1,
-    stats: emptyStats,
-    admin: false,
-  },
-  {
-    firstName: 'John',
-    lastName: 'Doe',
-    dob: new Date('1999-09-19'),
-    email: 'coolBeans@email.com',
-    password: 'password',
-    biography: 'I am a student at SUNY new paltz',
-    photo: JohnPhoto,
-    workouts: [
-      {
-        name: 'ChoO cHOo cAlOo',
-        sets: 4,
-        exercises: [
-          {
-            exercise: {
-              name: '90/90 Hamstring',
-              equipment: 'body only',
-              primaryMuscles: ['hamstrings'],
-              instructions: [
-                'Lie on your back, with one leg extended straight out.',
-                'With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.',
-                'Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.',
-                'Repeat for 10-20 repetitions, and then switch to the other leg.',
-              ],
-              category: 'stretching',
-            },
-            reps: 15,
-          },
-        ],
-      },
-    ],
-    following: [],
-    username: 'JohnD',
-    id: 2,
-    stats: emptyStats,
-    admin: false,
-  },
-])
+const friends = ref<User[]>([])
+if (user && user.value) {
+  getFollowing(user.value.id).then((following) => {
+    friends.value = following.data
+  })
+}
 
 function selectFriend(friend: User) {
   selectedFriend.value = friend
@@ -111,7 +44,9 @@ function toggleDropdown() {
 const workoutref = ref<Workout>()
 
 function viewWorkout(workout: Workout) {
-  workoutref.value = workout
+  getOne(selectedFriend.value.id, workout.id).then((workout) => {
+    workoutref.value = workout.data
+  })
 }
 </script>
 
@@ -141,11 +76,11 @@ function viewWorkout(workout: Workout) {
           <div class="card-image">
             <figure v-if="selectedFriend.photo === ''" class="image is-4by3">
               <img
-                src="https://bulma.io/assets/images/placeholders/1280x960.png"
+                src="../assets/UserIcon.png"
                 alt="Placeholder image"
               />
             </figure>
-            <figure v-else class="image is-4by3">
+            <figure v-else class="image is-square">
               <img :src="selectedFriend.photo" alt="Placeholder image" />
             </figure>
           </div>
@@ -157,7 +92,7 @@ function viewWorkout(workout: Workout) {
                   class="image is-48x48"
                 >
                   <img
-                    src="https://bulma.io/assets/images/placeholders/1280x960.png"
+                    src="../assets/UserIcon.png"
                     alt="Placeholder image"
                   />
                 </figure>
@@ -189,6 +124,7 @@ function viewWorkout(workout: Workout) {
                   :key="workout.name"
                 >
                   <div class="content">
+                    <!-- TODO: FIX HERE-->
                     <div class="dropdown-content">
                       <a class="dropdown-item" @click="viewWorkout(workout)">
                         {{ workout.name }}

@@ -5,6 +5,9 @@ import { api } from './myFetch';
 export async function getAll(id: number){
   return api<DataListEnvelope<Workout>>(`workouts/${id}`)
 }
+export async function getOne(uId: number, id: number){
+    return api<DataEnvelope<Workout>>(`workouts/${uId}/${id}`)
+}
 export async function update(uId: number, id: number, workout: Workout){
     return api<DataEnvelope<Workout>>( `workouts/${uId}/${id}`, workout, 'PATCH')
 }
