@@ -63,14 +63,29 @@ async function remove(userId, followingUserId) {
 }
 
 /**
- * Get the list of users a specific user is following
+ * Get the list of users a specific user is following along with their workouts
  * @param {number} userId - The ID of the user
- * @returns {Promise<DataListEnvelope<Following>>} - Resolves with the list of following relationships
+ * @returns {Promise<DataListEnvelope<User>>} - Resolves with the list of user objects and their workouts
  */
 async function getFollowing(userId) {
     const { data, error } = await connection
         .from("following")
-        .select("*")
+        .select(`
+            following_user_id,
+            users:following_user_id (
+                id,
+                firstName,
+                lastName,
+                username,
+                photo,
+                workouts (
+                    id,
+                    name,
+                    sets,
+                    user_id
+                )
+            )
+        `)
         .eq("user_id", userId);
 
     if (error) {
@@ -80,9 +95,15 @@ async function getFollowing(userId) {
         };
     }
 
+    // Extract user objects and their workouts from the data
+    const users = data.map(following => ({
+        ...following.users,
+        workouts: following.users.workouts
+    }));
+
     return {
         isSuccess: true,
-        data: data
+        data: users
     };
 }
 

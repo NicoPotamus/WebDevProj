@@ -13,7 +13,9 @@ GET http://localhost:3000/api/v1/exercise/
 GET http://localhost:3000/api/v1/exercise/1100
 
 ### 
-POST http://localhost:3000/api/v1/user/1100/
+GET http://localhost:3000/api/v1/user/12/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNTk5MzY0LCJleHAiOjE3MzM2ODU3NjR9.muDAKuEAEpLeHJPxsLSjtdhxDzF7tIBcEzWVK7pDorE
+
 ###
 POST http://localhost:3000/api/v1/user
 Content-Type: application/json
@@ -104,3 +106,14 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/api/v1/stats/11
+###
+GET http://localhost:3000/api/v1/following/11
+
+###
+POST http://localhost:3000/api/v1/user/login
+Content-Type: application/json
+
+{
+  "email": "attempt101@gmail.com",
+  "password": "securepass123"
+}
