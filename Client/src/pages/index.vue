@@ -22,7 +22,7 @@ const userStats = ref<Stats>({
   id: 1,
 })
 
-const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
+const weeklyStats = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
 
 async function loadStats() {
   if (user.value) {

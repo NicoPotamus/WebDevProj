@@ -32,7 +32,7 @@ export interface User {
   workouts?: Workout[]
   following?: number[]//holds other friends id's
   stats: Stats
-  statsId?: number
+  stats_id?: number
   username: string
   id: number
   admin: boolean
