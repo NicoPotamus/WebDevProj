@@ -2,7 +2,7 @@
   "name": "webdevproj",
   "version": "1.0.0",
   "description": "Final Project for Web Server Programming",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js --watch server",
