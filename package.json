@@ -2,10 +2,10 @@
   "name": "webdevproj",
   "version": "1.0.0",
   "description": "Final Project for Web Server Programming",
-  "main": "server/index.js",
+  "main": "erver/index.js",
   "scripts": {
-    "start": "node erver/index.js",
-    "dev": "nodemon erver/index.js --watch server",
+    "start": "node Server/index.js",
+    "dev": "nodemon Server/index.js --watch server",
     "build": "npm i --production && cd Client && npm i && npm run build"
   },
   "dependencies": {
