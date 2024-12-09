@@ -1,36 +1,54 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { getAll, remove, update, type User } from '@/model/user'
+import { getAll, remove, update, create, type User, emptyStats } from '@/model/user'
 import { onMounted, ref, computed } from 'vue'
 import PersonalInfo from '@/components/PersonalInfo.vue'
-import { refUser } from '@/model/sesssion';
-import router from '@/router';
-import { type Exercise, getAll as getAllExercises, remove as removeEx, create as createEx, update as updateExercise} from '@/model/exercises';
-import EditExercise from '@/components/EditExercise.vue';
+import { refUser } from '@/model/sesssion'
+import {
+  type Exercise,
+  getAll as getAllExercises,
+  remove as removeEx,
+  create as createEx,
+  update as updateExercise,
+} from '@/model/exercises'
+import EditExercise from '@/components/EditExercise.vue'
 
 const editUser = refUser()
 const editModal = ref<boolean>(false)
 
 const errorMessage = ref('')
 
-const userList = ref<User[]>([])  // Initialize as an empty array
+const userList = ref<User[]>([]) // Initialize as an empty array
 
 async function saveChanges() {
   editModal.value = false
-  try {
-    if (editUser.value) {
-      const newUser = await update(editUser.value)
-      console.log('User created:', newUser)
-      // Redirect to a different page after successful account creation
-      router.push('/')
-    } else {
-      console.error('User is null')
+  if (editUser.value) {
+    try {
+      if (editUser.value.id === 0) {
+        // Create new exercise
+        const response = await create(editUser.value)
+        if (response.isSuccess) {
+          userList.value.push(response.data)
+        } else {
+          console.error('Failed to create exercise:', response.error)
+        }
+      } else {
+        // Update existing exercise
+        const response = await update(editUser.value)
+        if (response.isSuccess) {
+          const index = userList.value.findIndex(
+            u => u.id === editUser.value?.id,
+          )
+          if (index !== -1) {
+            userList.value[index] = response.data
+          }
+        } else {
+          console.error('Failed to update exercise:', response.error)
+        }
+      }
+    } catch (error) {
+      console.error('Error saving exercise:', error)
     }
-    // Redirect to a different page after successful account creation
-    router.push('/')
-  } catch (error) {
-    console.error('Create account error:', error)
-    errorMessage.value = 'Failed to create account. Please try again.'
   }
 }
 
@@ -40,13 +58,12 @@ function fEditUser(user: User) {
 }
 
 async function removeUser(user: User) {
-  await remove(user.id??0)
-  userList.value = userList.value.filter((u) => u.id !== user.id)
+  await remove(user.id ?? 0)
+  userList.value = userList.value.filter(u => u.id !== user.id)
 }
 
-
 //----------------------- Exercise time
-const exerciseList = ref<Exercise[]>([])  // Initialize as an empty array
+const exerciseList = ref<Exercise[]>([]) // Initialize as an empty array
 
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
@@ -86,7 +103,14 @@ async function loadExercises() {
     console.error('Error loading exercises:', error)
   }
 }
-const editEx = ref<Exercise | null>({ id: 0, name: '', equipment: '', category: '', primaryMuscles: [], instructions: [] })
+const editEx = ref<Exercise | null>({
+  id: 0,
+  name: '',
+  equipment: '',
+  category: '',
+  primaryMuscles: [],
+  instructions: [],
+})
 const editExModal = ref<boolean>(false)
 
 function fEditExercise(ex: Exercise) {
@@ -110,7 +134,9 @@ async function saveExercise() {
         // Update existing exercise
         const response = await updateExercise(editEx.value)
         if (response.isSuccess) {
-          const index = exerciseList.value.findIndex(e => e.id === editEx.value?.id)
+          const index = exerciseList.value.findIndex(
+            e => e.id === editEx.value?.id,
+          )
           if (index !== -1) {
             exerciseList.value[index] = response.data
           }
@@ -118,7 +144,6 @@ async function saveExercise() {
           console.error('Failed to update exercise:', response.error)
         }
       }
-      
     } catch (error) {
       console.error('Error saving exercise:', error)
     }
@@ -174,7 +199,28 @@ onMounted(async () => {
           </thead>
           <tfoot>
             <tr>
-              <td colspan="9"><button class="button is-primary">Add User</button></td>
+              <td colspan="9">
+                <button
+                  class="button is-primary"
+                  @click="
+                    fEditUser({
+                      id: 0,
+                      dob: new Date(),
+                      email: '',
+                      username: '',
+                      firstName: '',
+                      lastName: '',
+                      password: '',
+                      photo: '',
+                      following: [],
+                      stats: emptyStats(),
+                      admin: false,
+                    })
+                  "
+                >
+                  Add User
+                </button>
+              </td>
             </tr>
           </tfoot>
           <tbody>
@@ -214,7 +260,23 @@ onMounted(async () => {
               <th>Category</th>
               <th>Primary Muscles</th>
               <th>Instructions</th>
-              <th><button class="button is-primary" @click="fEditExercise({ id: 0, name: '', equipment: '', category: '', primaryMuscles: [], instructions: [] })">Add Exercise</button></th>
+              <th>
+                <button
+                  class="button is-primary"
+                  @click="
+                    fEditExercise({
+                      id: 0,
+                      name: '',
+                      equipment: '',
+                      category: '',
+                      primaryMuscles: [],
+                      instructions: [],
+                    })
+                  "
+                >
+                  Add Exercise
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -228,12 +290,18 @@ onMounted(async () => {
               <td>
                 <div class="columns">
                   <div class="column is-half">
-                    <button class="button is-light" @click="fEditExercise(exercise)">
+                    <button
+                      class="button is-light"
+                      @click="fEditExercise(exercise)"
+                    >
                       <i class="fa-solid fa-pencil"></i>
                     </button>
                   </div>
                   <div class="column is-half">
-                    <button class="delete" @click="removeExercise(exercise)"></button>
+                    <button
+                      class="delete"
+                      @click="removeExercise(exercise)"
+                    ></button>
                   </div>
                 </div>
               </td>
@@ -242,12 +310,34 @@ onMounted(async () => {
           <tfoot>
             <tr>
               <td colspan="7">
-                <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-                  <button class="pagination-previous" @click="prevPage" :disabled="currentPage === 1">Previous</button>
-                  <button class="pagination-next" @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+                <nav
+                  class="pagination is-centered"
+                  role="navigation"
+                  aria-label="pagination"
+                >
+                  <button
+                    class="pagination-previous"
+                    @click="prevPage"
+                    :disabled="currentPage === 1"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    class="pagination-next"
+                    @click="nextPage"
+                    :disabled="currentPage === totalPages"
+                  >
+                    Next
+                  </button>
                   <ul class="pagination-list">
                     <li v-for="page in totalPages" :key="page">
-                      <button class="pagination-link" @click="currentPage = page" :class="{ 'is-current': currentPage === page }">{{ page }}</button>
+                      <button
+                        class="pagination-link"
+                        @click="currentPage = page"
+                        :class="{ 'is-current': currentPage === page }"
+                      >
+                        {{ page }}
+                      </button>
                     </li>
                   </ul>
                 </nav>

@@ -1,8 +1,6 @@
 import { ref } from "vue";
 import { type User } from "./user";
-import { useRouter } from "vue-router";
 
-const router = useRouter()
 
 const loggedInUser = ref<User | null>(null);
 
@@ -37,7 +35,6 @@ export function initializeUser() {
             }
         }catch(error){
       console.error('User not logged in:', error)
-      router.push('/Signin')
     }
   }
 }

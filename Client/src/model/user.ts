@@ -12,7 +12,7 @@ export async function create(user: User){
   return apiNoToken<DataEnvelope<User>>('user/login/register', user, 'POST')
 }
 export async function update(user: User){
-  return api<DataEnvelope<User>>(`user/${user.id}`, user, 'PUT')
+  return api<DataEnvelope<User>>(`user/${user.id}`, user, 'PATCH')
 }
 export async function remove(id: number){
   return api<DataEnvelope<User>>(`user/${id}`, undefined, 'DELETE')
@@ -42,6 +42,9 @@ export async function getStats(id: number){
   return api<DataEnvelope<Stats>>(`stats/${id}`)
 }
 export async function updateStats(id: number, stats: Stats){
+  return api<DataEnvelope<Stats>>(`stats/${id}`, stats, 'PATCH')
+}
+export async function updateRecords(id: number, stats: Stats){
   return api<DataEnvelope<Stats>>(`stats/${id}`, stats, 'PATCH')
 }
 export interface Stats {

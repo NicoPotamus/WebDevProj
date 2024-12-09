@@ -89,7 +89,6 @@ async function update(id, stats) {
   const { data, error } = await connection//failing fetch
     .from("stats")
     .update({
-      recordedWorkouts: recordedWorkoutsJSON,
       deadlift: stats.deadlift,
       squat: stats.squat,
       bench: stats.bench,

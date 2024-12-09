@@ -1,15 +1,18 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import type { Workout } from '@/model/workoutModel'
+import { ref, onMounted } from 'vue'
 import { refUser } from '@/model/sesssion'
-import { getStats, updateStats, type Stats } from '@/model/user'
-import { getAll } from '@/model/workoutModel'
-
+import { getStats, type Stats, updateStats, updateStats as updateUserStats } from '@/model/user'
+import { getAll, type Workout } from '@/model/workoutModel'
+import UpdateRecords from '@/components/UpdateRecords.vue';
+import { useRouter } from 'vue-router';
 
 const user = refUser()
-
-
+ const router = useRouter()
+if(!user.value){
+  console.log('user is null')
+  router.push('/login')
+}
 
 const userStats = ref<Stats>({
   recordedWorkouts: {},
@@ -19,12 +22,11 @@ const userStats = ref<Stats>({
   id: 1,
 })
 
-
 const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
 
 async function loadStats() {
   if (user.value) {
-    const response = await getStats(user.value.stats_id??0)
+    const response = await getStats(user.value.stats_id ?? 0)//Error is false 
     userStats.value = response.data
     user.value.stats = response.data
     console.log('user stats:', response)
@@ -50,7 +52,7 @@ function stringifyDate(date: Date): string {
     '-' +
     (date.getMonth() + 1).toString().padStart(2, '0') +
     '-' +
-    (date.getDate()).toString().padStart(2, '0')
+    date.getDate().toString().padStart(2, '0')
   return str
 }
 
@@ -78,7 +80,7 @@ async function logWorkout() {
   console.log('workout DAte', workoutDate.value)
 
   if (workoutDate.value && workoutPerformed.value) {
-    const workouts = userStats.value?.recordedWorkouts[workoutDate.value]//get completed workouts for given day
+    const workouts = userStats.value?.recordedWorkouts[workoutDate.value] //get completed workouts for given day
     if (workouts) {
       workouts.push(workoutPerformed.value.id)
       if (userStats.value && userStats.value.recordedWorkouts) {
@@ -92,7 +94,7 @@ async function logWorkout() {
       }
     }
     if (userStats.value?.id !== undefined) {
-      await updateStats(userStats.value.id, userStats.value)
+      await updateUserStats(userStats.value.id, userStats.value)
       console.log('logged workout')
     }
   }
@@ -112,6 +114,17 @@ function setWorkout(workout: Workout) {
   workoutPerformed.value = workout
   toggleDropdown()
 }
+
+//--------------------------------update Personal Records----------------------
+const editStat = ref(false)
+async function updatePersonalStats(){
+  if(userStats.value?.id !== undefined){
+    await updateStats(userStats.value.id, userStats.value)
+    console.log('updated stats')
+  }
+  editStat.value = false
+}
+
 
 onMounted(async () => {
   await loadStats()
@@ -189,6 +202,7 @@ onMounted(async () => {
               Squat: <b>{{ user.stats ? user.stats.squat : '0' }}</b>
             </p>
           </section>
+          <div class="button" @click="editStat = true">Update Recs</div>
         </div>
         <div class="box">
           <section class="hero">
@@ -202,7 +216,9 @@ onMounted(async () => {
                 <div class="dropdown-trigger" @click="toggleDropdown()">
                   <button class="card-header-icon" aria-label="more options">
                     <p class="card-header-title">
-                      {{ workoutPerformed ? workoutPerformed.name : 'Workouts' }}
+                      {{
+                        workoutPerformed ? workoutPerformed.name : 'Workouts'
+                      }}
                     </p>
                     <span class="icon">
                       <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -237,6 +253,27 @@ onMounted(async () => {
             Log Workout
           </button>
         </div>
+
+        
+      </div>
+    </div>
+  </div>
+  <div class="modal" :class="{ 'is-active': editStat }">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Update Personal Records</p>
+        </header>
+        <section class="modal-card-body">
+          <UpdateRecords v-if="user?.stats" :stats="user.stats" />
+          <button
+            class="modal-close is-large"
+            aria-label="close"
+            @click="editStat = false"
+          ></button>
+          <button class="button is-success" @click="updatePersonalStats()">Save</button>
+        </section>
       </div>
     </div>
   </div>
