@@ -1,18 +1,15 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { Workout } from '@/model/workoutModel'
 import { refUser } from '@/model/sesssion'
-import { useRouter } from 'vue-router'
 import { getStats, updateStats, type Stats } from '@/model/user'
 import { getAll } from '@/model/workoutModel'
 
-const router = useRouter()
+
 const user = refUser()
 
-if (!user.value) {
-  router.push('/Signin')
-}
+
 
 const userStats = ref<Stats>({
   recordedWorkouts: {},
@@ -21,13 +18,16 @@ const userStats = ref<Stats>({
   squat: 0,
   id: 1,
 })
+
+
 const weeklyStats = ref([0, 0, 0, 0, 0, 0, 0])
 
 async function loadStats() {
   if (user.value) {
-    const response = await getStats(user.value.id)
+    const response = await getStats(user.value.stats_id??0)
+    userStats.value = response.data
     user.value.stats = response.data
-    console.log('userWorkouts:', user.value.stats)
+    console.log('user stats:', response)
   }
 }
 async function loadWorkouts() {
@@ -37,8 +37,6 @@ async function loadWorkouts() {
     console.log('userWorkouts:', user.value.workouts)
   }
 }
-loadWorkouts()
-loadStats()
 
 const today = new Date() // get current date
 const sDay = today.getDate() - today.getDay()
@@ -76,7 +74,7 @@ function compileStats() {
 const workoutDate = ref<string>('') //default date of today
 const workoutPerformed = ref<Workout>()
 
-function logWorkout() {
+async function logWorkout() {
   console.log('workout DAte', workoutDate.value)
 
   if (workoutDate.value && workoutPerformed.value) {
@@ -94,7 +92,8 @@ function logWorkout() {
       }
     }
     if (userStats.value?.id !== undefined) {
-      updateStats(userStats.value.id, userStats.value)
+      await updateStats(userStats.value.id, userStats.value)
+      console.log('logged workout')
     }
   }
   compileStats()
@@ -113,6 +112,12 @@ function setWorkout(workout: Workout) {
   workoutPerformed.value = workout
   toggleDropdown()
 }
+
+onMounted(async () => {
+  await loadStats()
+  loadWorkouts()
+  compileStats()
+})
 </script>
 
 <template>

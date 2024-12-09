@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { refUser, signIn } from '@/model/sesssion';
+import { refUser, signOut } from '@/model/sesssion';
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
@@ -42,7 +42,7 @@ const user = refUser()
       <div class="navbar-end">
 
         <div v-if="user" class="navbar-item">
-          <button class="button is-danger" @click="signIn(null)">
+          <button class="button is-danger" @click="signOut()">
             <strong>Log Out</strong>
           </button>
         </div>

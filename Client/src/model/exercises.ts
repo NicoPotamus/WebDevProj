@@ -12,7 +12,7 @@ export async function create(exercise: Exercise){
   return api<DataEnvelope<Exercise>>('exercises', exercise, 'POST')
 }
 export async function update(exercise: Exercise){
-  return api<DataEnvelope<Exercise>>(`exercises/${exercise.id}`, exercise, 'PUT')
+  return api<DataEnvelope<Exercise>>(`exercises/${exercise.id}`, exercise, 'PATCH')
 }
 export async function remove(id: number){
   return api<DataEnvelope<Exercise>>(`exercises/${id}`, undefined, 'DELETE')

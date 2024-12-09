@@ -1,7 +1,9 @@
 
 import type { DataEnvelope, DataListEnvelope } from './dataEnvelope'
+import type { Exercise } from './exercises'
 import { api } from './myFetch'
 import type { User } from './user'
+
 
 export async function getFollowing(id: number){
   return api<DataListEnvelope<User>>(`following/${id}`)
@@ -17,13 +19,4 @@ export async function remove(id: number){
 }
 
 
-
-export interface Exercise {
-    id: number
-    name: string
-    equipment: string | null
-    primaryMuscles: string[]
-    instructions: string[]
-    category: string
-}
 
