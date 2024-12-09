@@ -124,7 +124,9 @@ async function add(user) {
  * @returns {Promise<DataEnvelope<User>>} - resolves with the updated user
  */
 async function update(id, user) {
-  const { data, error } = await connection.from("users").update({
+  const { data, error } = await connection.
+  from("users").
+  update({
     firstName: user.firstName,
     lastName: user.lastName,
     dob: user.dob,
@@ -134,8 +136,10 @@ async function update(id, user) {
     photo: user.photo,
     username: user.username,
     admin: user.admin,
-    updatedAt: new Date().toISOString(),
   })
+  .eq("id", id)
+  .select("*")
+  .single();
   return   {
       isSuccess: !error,
       message: error?.message,

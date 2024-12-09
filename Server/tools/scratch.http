@@ -18,6 +18,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtc
 
 ###
 POST http://localhost:3000/api/v1/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNTk5MzY0LCJleHAiOjE3MzM2ODU3NjR9.muDAKuEAEpLeHJPxsLSjtdhxDzF7tIBcEzWVK7pDorE
 Content-Type: application/json
 
     {
@@ -106,6 +107,7 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/api/v1/stats/11
+
 ###
 GET http://localhost:3000/api/v1/following/11
 
@@ -116,4 +118,37 @@ Content-Type: application/json
 {
   "email": "attempt101@gmail.com",
   "password": "securepass123"
+}
+
+###
+PATCH http://localhost:3000/api/v1/stats/recordedworkouts/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNzMwMjM3LCJleHAiOjE3MzM4MTY2Mzd9.RsCp4aAfQwMZothhoWgc4JVWkj7g7kDYD8lJ6yX4qQI
+Content-Type: application/json
+
+{
+  "recordedWorkouts": {
+    "2024-12-09": [1],
+    "2023-12-11": [4, 5]
+  }
+}
+
+###
+GET http://localhost:3000/api/v1/stats/13
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNzMwMjM3LCJleHAiOjE3MzM4MTY2Mzd9.RsCp4aAfQwMZothhoWgc4JVWkj7g7kDYD8lJ6yX4qQI
+
+###
+PATCH http://localhost:3000/api/v1/stats/13
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNzMwMjM3LCJleHAiOjE3MzM4MTY2Mzd9.RsCp4aAfQwMZothhoWgc4JVWkj7g7kDYD8lJ6yX4qQI
+Content-Type: application/json
+
+{
+  "stats": {
+    "bench": 65,
+    "deadlift": 90,
+    "squat": 75,
+    "recordedWorkouts": {
+      "2024-12-09": [1],
+      "2023-12-11": [4, 5]
+    }
+  }
 }

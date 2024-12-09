@@ -30,7 +30,7 @@ async function getById(id) {
   }
 
   // Ensure data.recordedworkouts is not null or undefined
-  const recordedWorkouts = data.recordedworkouts ? JSON.parse(data.recordedworkouts) : {};
+  const recordedWorkouts = data.recordedWorkouts ? JSON.parse(data.recordedWorkouts) : {};
 
   const deserializeStats = {
     ...data,
@@ -55,7 +55,7 @@ async function add(stats) {
   const { data, error } = await connection
     .from("stats")
     .insert({
-      recordedworkouts: recordedWorkoutsJSON,
+      recordedWorkouts: recordedWorkoutsJSON,
       deadlift: stats.deadlift,
       squat: stats.squat,
       bench: stats.bench,
@@ -86,10 +86,9 @@ async function add(stats) {
  */
 async function update(id, stats) {
   const recordedWorkoutsJSON = JSON.stringify(stats.recordedWorkouts);
-  const { data, error } = await connection
+  const { data, error } = await connection//failing fetch
     .from("stats")
     .update({
-      recordedWorkouts: recordedWorkoutsJSON,
       deadlift: stats.deadlift,
       squat: stats.squat,
       bench: stats.bench,
@@ -124,9 +123,66 @@ async function remove(id) {
     data: data,
   };
 }
+
+
+
+/**
+ * Append records to recordedWorkouts JSONB column in Supabase table
+ * @param {Number} statsId - The ID of the stats record to update
+ * @param {Object} newRecord - New record to append where key is the date string and value is an array of numbers
+ * @returns {Promise<Object>} - Result of the update operation
+ */
+async function appendToRecordedWorkouts(statsId, newRecord) {
+  // Fetch the current recordedWorkouts
+  const { data, error: fetchError } = await connection
+    .from("stats")
+    .select("recordedWorkouts")
+    .eq("id", statsId)
+    .single();
+
+  if (fetchError) {
+    console.error("Error fetching current recordedWorkouts:", fetchError);
+    return { isSuccess: false, message: fetchError.message };
+  }
+
+  // Parse the current recordedWorkouts JSONB data
+  const recordedWorkouts = data.recordedWorkouts ? JSON.parse(data.recordedWorkouts) : {};
+
+  // Append or update records
+  Object.keys(newRecord).forEach(date => {
+    if (recordedWorkouts[date]) {
+      // Append index 0 of the new values array to the existing values array
+      recordedWorkouts[date].push(newRecord[date][0]);
+    } else {
+      // Add new record if no matching date is found
+      recordedWorkouts[date] = newRecord[date];
+    }
+  });
+
+  // Convert updated workouts to JSON string
+  const updatedWorkoutsJSON = JSON.stringify(recordedWorkouts);
+
+  // Update the recordedWorkouts column
+  const { error: updateError } = await connection
+    .from("stats")
+    .update({ recordedWorkouts: updatedWorkoutsJSON })
+    .eq("id", statsId);
+
+  if (updateError) {
+    console.error("Error updating recordedWorkouts:", updateError);
+    return { isSuccess: false, message: updateError.message };
+  }
+
+  return { isSuccess: true, message: "RecordedWorkouts updated successfully" };
+}
+
+
+
+
 module.exports = {
   getById,
   add,
   update,
   remove,
-};
+  appendToRecordedWorkouts
+}

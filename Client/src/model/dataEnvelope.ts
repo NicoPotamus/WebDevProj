@@ -1,3 +1,4 @@
+import type { User } from "./user"
 
 
 export interface DataEnvelope<T> {
@@ -9,4 +10,9 @@ export interface DataEnvelope<T> {
   export interface DataListEnvelope<T> extends DataEnvelope<T[]> {
     data: T[]
     count: number
+  }
+  export interface LoginEnvelope {
+    user:User
+    token:string
+    msg:string
   }

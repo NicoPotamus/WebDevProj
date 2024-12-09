@@ -33,6 +33,16 @@ app.patch("/:id", (req, res, next) => {
         .then((data) => res.send(data))
         .catch(next);
 });
+/**
+ * Update user records
+ */
+app.patch("/recordedworkouts/:id", (req, res, next) => {
+    const id = req.params.id;
+    statsModel
+        .appendToRecordedWorkouts(+id, req.body)
+        .then((data) => res.send(data))
+        .catch(next);
+})
 
 /**
  * Delete a user's stats

@@ -19,7 +19,7 @@ app.post("/", (req, res) => {
             }
           );
           return res.json({
-            email: data.data.email,
+            user: data.data,
             token,
             msg: "Login Success",
           });
@@ -32,5 +32,13 @@ app.post("/", (req, res) => {
           .status(500)
           .json({ msg: "Internal Server Error", error: error.message })
       );
-  });
+  })
+
+  .post("/register", (req, res, next) => {
+    //This is the route that will be used to Add a user to the users.json file
+    model
+      .add(req.body)
+      .then((data) => res.send(data))
+      .catch(next);
+  })
   module.exports = app;

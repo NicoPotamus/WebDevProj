@@ -12,9 +12,9 @@ const router = useRouter()
 
 async function handleLogin() {
   try {
-      login(email.value, password.value).then((user) => {
-      signIn(user.data)
-      console.log('User logged in:', user.data)
+      login(email.value, password.value).then((loginEnv) => {
+      signIn(loginEnv.user, loginEnv.token)
+      console.log('User logged in:', loginEnv.user)
       // Redirect to a different page after successful login
       router.push('/')
       console.log('User logged in: and rerouted')
