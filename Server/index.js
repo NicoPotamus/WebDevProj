@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 app.use(cors());
 
 app.use(express.json());
-app.use(express.static(__dirname + "/dist"));
+app.use(express.static(__dirname + "../Client/dist"));
 
 // Public routes
 app.get("/", (req, res, next) => {
@@ -39,7 +39,7 @@ app.use("/api/v1/following", authenticateJWT, followingController);
 app.use("/api/v1/stats", authenticateJWT, statsController);
 
 app.get("*", (req, res, next) => {
-    res.sendFile(__dirname + "/dist/index.html");
+    res.sendFile(__dirname + "../Client/dist/index.html");
 });
 
 // Error Handling
