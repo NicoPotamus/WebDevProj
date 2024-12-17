@@ -39,7 +39,7 @@ app.use("/api/v1/following", authenticateJWT, followingController);
 app.use("/api/v1/stats", authenticateJWT, statsController);
 
 app.get("*", (req, res, next) => {
-    res.sendFile(__dirname + "/dist/index.html");
+    res.sendFile(__dirname + "/../Client/dist");
 });
 
 // Error Handling
