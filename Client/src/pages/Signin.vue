@@ -12,16 +12,19 @@ const router = useRouter()
 
 async function handleLogin() {
   try {
-      login(email.value, password.value).then((loginEnv) => {
-      signIn(loginEnv.user, loginEnv.token)
-      console.log('User logged in:', loginEnv.user)
+    const response = await login(email.value, password.value)
+    if (response.isSuccess) {
+      signIn(response.user, response.token)
+      console.log('User logged in:', response.user)
       // Redirect to a different page after successful login
       router.push('/')
       console.log('User logged in: and rerouted')
-    })
+    } else {
+      errorMessage.value = response.msg || 'Invalid email or password'
+    }
   } catch (error) {
     console.error('Login error:', error)
-    errorMessage.value = 'Invalid email or password'
+    errorMessage.value = 'An error occurred during login. Please try again.'
   }
 }
 </script>

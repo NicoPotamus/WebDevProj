@@ -22,9 +22,12 @@ app.post("/", (req, res) => {
             user: data.data,
             token,
             msg: "Login Success",
+            isSuccess: true,
           });
         } else {
-          return res.json({ msg: "Invalid Credentials" });
+          return res.json({ msg: "Invalid Credentials",
+            isSuccess: false
+           });
         }
       })
       .catch((error) =>

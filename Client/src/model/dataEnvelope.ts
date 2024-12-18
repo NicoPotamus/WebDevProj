@@ -15,4 +15,5 @@ export interface DataEnvelope<T> {
     user:User
     token:string
     msg:string
+    isSuccess:boolean
   }
