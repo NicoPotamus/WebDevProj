@@ -11,7 +11,7 @@ const user = refUser()
  const router = useRouter()
 if(!user.value){
   console.log('user is null')
-  router.push('/login')
+  router.push('/signin')
 }
 
 const userStats = ref<Stats>({
