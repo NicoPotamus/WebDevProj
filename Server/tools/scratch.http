@@ -107,9 +107,13 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/api/v1/stats/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzM0NjMzOTE2LCJleHAiOjE3MzQ3MjAzMTZ9.tka0cXotdZez50BklfTzIuB1ARGIFryplcw7jdjufjE
+
 
 ###
 GET http://localhost:3000/api/v1/following/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzM0NjMzMDk4LCJleHAiOjE3MzQ3MTk0OTh9.3AUqXWHHsv5ppf1poWniKi_4KTpxpoSiqe3GORrwN8g
+
 
 ###
 POST http://localhost:3000/api/v1/user/login
@@ -122,7 +126,7 @@ Content-Type: application/json
 
 ###
 PATCH http://localhost:3000/api/v1/stats/recordedworkouts/11
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNzMwMjM3LCJleHAiOjE3MzM4MTY2Mzd9.RsCp4aAfQwMZothhoWgc4JVWkj7g7kDYD8lJ6yX4qQI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzM0NjMzOTE2LCJleHAiOjE3MzQ3MjAzMTZ9.tka0cXotdZez50BklfTzIuB1ARGIFryplcw7jdjufjE
 Content-Type: application/json
 
 {
@@ -133,8 +137,13 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000/api/v1/stats/13
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzMzNzMwMjM3LCJleHAiOjE3MzM4MTY2Mzd9.RsCp4aAfQwMZothhoWgc4JVWkj7g7kDYD8lJ6yX4qQI
+GET http://localhost:3000/api/v1/user/search?query=cool
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzM0NjMzOTE2LCJleHAiOjE3MzQ3MjAzMTZ9.tka0cXotdZez50BklfTzIuB1ARGIFryplcw7jdjufjE
+
+###
+GET http://localhost:3000/api/v1/user/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF0dGVtcHQxMDFAZ21haWwuY29tIiwiaWF0IjoxNzM0NjM0MjA2LCJleHAiOjE3MzQ3MjA2MDZ9.yTvxvuDyYKZEEQN2zik5YFuw-GI36m9GnSwHrVPw-zc
+
 
 ###
 PATCH http://localhost:3000/api/v1/stats/13
@@ -152,3 +161,5 @@ Content-Type: application/json
     }
   }
 }
+
+

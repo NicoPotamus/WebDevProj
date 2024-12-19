@@ -20,6 +20,9 @@ export async function remove(id: number){
 export async function login(email: string, password: string){
   return api<LoginEnvelope>(`user/login`, {email, password}, 'POST')
 }
+export async function search(sQuerey: string){
+  return api<DataListEnvelope<User>>(`user/search${sQuerey}`, undefined, 'GET')
+}
 
 export interface User {
   firstName: string

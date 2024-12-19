@@ -1,11 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { getFollowing } from '@/model/following';
-import { emptyStats, type User } from '@/model/user'
+import { getFollowing } from '@/model/following'
+import { emptyStats, search, type User } from '@/model/user'
 import { getOne, type Workout } from '@/model/workoutModel'
 import { ref } from 'vue'
-
-import { refUser }from '@/model/sesssion'
+import { refUser } from '@/model/sesssion'
+import { OAutocomplete, OField } from '@oruga-ui/oruga-next'
 
 const user = refUser()
 
@@ -27,13 +27,36 @@ const selectedFriend = ref<User>({
 
 const friends = ref<User[]>([])
 if (user && user.value) {
-  getFollowing(user.value.id).then((following) => {
+  getFollowing(user.value.id).then(following => {
     friends.value = following.data
   })
 }
 
-function selectFriend(friend: User) {
-  selectedFriend.value = friend
+//search function Final
+
+async function searchFriends(query: string) {
+  if (query.length > 2) {
+    const response = await search(query)
+
+    const data = await response.data
+    searchResults.value = data.map((user: User) => {
+      return {
+        ...user,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        biography: user.biography,
+        photo: user.photo,
+        username: user.username,
+      }
+    })
+  }
+}
+const searchQuery = ref('')
+
+function selectFriend(friend: User | undefined) {
+  if (friend) {
+    selectedFriend.value = friend
+  }
 }
 
 //for dropdown inside card
@@ -42,9 +65,10 @@ function toggleDropdown() {
   dropdownState.value = !dropdownState.value
 }
 const workoutref = ref<Workout>()
+const searchResults = ref<User[]>([])
 
 function viewWorkout(workout: Workout) {
-  getOne(selectedFriend.value.id, workout.id).then((workout) => {
+  getOne(selectedFriend.value.id, workout.id).then(workout => {
     workoutref.value = workout.data
   })
 }
@@ -54,6 +78,25 @@ function viewWorkout(workout: Workout) {
   <div class="hero is-link">
     <div class="hero-body">
       <p class="title">My Friends</p>
+      <div class="is-pulled-right">
+        <o-field label="Find a JS framework">
+          <o-autocomplete
+            v-model="searchQuery"
+            :data="searchResults"
+            field="firstName"
+            placeholder="Search friends..."
+            expanded
+            check-scroll
+            open-on-focus
+            @input="searchFriends(searchQuery)"
+            @select="selectFriend || undefined"
+          />
+        </o-field>
+        <p>
+          <b>Selected:</b> {{ selectedFriend.firstName
+          }}{{ selectedFriend.lastName }}
+        </p>
+      </div>
     </div>
   </div>
 
@@ -75,10 +118,7 @@ function viewWorkout(workout: Workout) {
         <div class="card">
           <div class="card-image">
             <figure v-if="selectedFriend.photo === ''" class="image is-4by3">
-              <img
-                src="../assets/UserIcon.png"
-                alt="Placeholder image"
-              />
+              <img src="../assets/UserIcon.png" alt="Placeholder image" />
             </figure>
             <figure v-else class="image is-square">
               <img :src="selectedFriend.photo" alt="Placeholder image" />
@@ -91,10 +131,7 @@ function viewWorkout(workout: Workout) {
                   v-if="selectedFriend.photo === ''"
                   class="image is-48x48"
                 >
-                  <img
-                    src="../assets/UserIcon.png"
-                    alt="Placeholder image"
-                  />
+                  <img src="../assets/UserIcon.png" alt="Placeholder image" />
                 </figure>
                 <figure v-else class="image is-48x48">
                   <img :src="selectedFriend.photo" alt="Placeholder image" />
@@ -180,9 +217,7 @@ function viewWorkout(workout: Workout) {
       </section>
       <footer class="modal-card-foot">
         <div class="buttons">
-          <button class="button" @click="workoutref = undefined">
-            Done
-          </button>
+          <button class="button" @click="workoutref = undefined">Done</button>
         </div>
       </footer>
     </div>

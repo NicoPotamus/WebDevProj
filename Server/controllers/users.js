@@ -12,6 +12,13 @@ app
       .then((data) => res.send(data))
       .catch(next);
   })
+  .get("/search", async (req, res, next) => {
+    const query = req.query.query;
+    model
+      .searchUsers(query)
+      .then((data) => res.send(data))
+      .catch(next);
+  })
   .get("/:id", (req, res, next) => {
     //This is the route that will be used to get a specific user from the users.json file
     const id = req.params.id;
@@ -61,8 +68,8 @@ app
       .login(email, password)
       .then((data) => res.send(data))
       .catch(next);
-  });
-
+  })
+  
 
 
 module.exports = app;

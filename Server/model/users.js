@@ -3,7 +3,7 @@ const { getConnection } = require("./supabase");
 const connection = getConnection();
 const workoutModel = require("./workouts");
 const statsModel = require("./stats");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 /**
  * @tmeplate T
  * @typedef {import("../../Client/src/model/dataEnvelope.ts").DataEnvelope} DataEnvelope
@@ -178,6 +178,23 @@ async function seed() {
     },
   ];
 }
+/**
+ * Search users by query
+ * @param {string} query - The search query
+ * @returns {Promise<DataEnvelope<User[]>>} - resolves with the search results
+ */
+async function searchUsers(query) {
+  const { data, error } = await connection
+    .from("users")
+    .select("id, firstName, lastName, username, biography, photo")
+    .or(`firstName.ilike.%${query}%,lastName.ilike.%${query}%,username.ilike.%${query}%`)
+
+  return {
+    isSuccess: !error,
+    message: error?.message,
+    data: data,
+  };
+}
 
 module.exports = {
   getAll,
@@ -186,5 +203,6 @@ module.exports = {
   update,
   remove,
   seed,
-  login
+  login,
+  searchUsers
 };
